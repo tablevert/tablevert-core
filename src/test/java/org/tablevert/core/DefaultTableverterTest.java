@@ -1,6 +1,6 @@
 /*
-Copyright 2019 doc-hil
-SPDX-License-Identifier: Apache-2.0
+ * Copyright 2019 doc-hil
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package org.tablevert.core;
@@ -16,7 +16,6 @@ public class DefaultTableverterTest {
     public void returnsDummyDummyString() {
         String dummy = defaultTableverter.getDummyDummyString();
         Assertions.assertTrue(dummy.contains("dummy string"));
-        System.out.println("gloob ick nich");
     }
 
 }
