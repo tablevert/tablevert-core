@@ -6,13 +6,12 @@
 package org.tablevert.core;
 
 /**
- * Entry point for providing the tablevert conversion functionality.
+ * Source data provider for databases.
  *
  * @author doc-hil
  */
-public interface Tableverter {
+interface DatabaseReader {
 
-    String getDummyDummyString();
-
+    DataGrid fetchData(DatabaseQuery databaseQuery) throws Exception;
 
 }
