@@ -12,7 +12,15 @@ package org.tablevert.core;
  */
 public interface Tableverter {
 
-    String getDummyDummyString();
+    /**
+     * Retrieves source table data, converts it to and returns it in the requested format.
+     *
+     * @param appliedQuery query with additional filtering and sorting
+     * @param outputFormat format expected for the tableversion's output
+     * @return the converted table
+     */
+    Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws Exception;
+
 
 
 }

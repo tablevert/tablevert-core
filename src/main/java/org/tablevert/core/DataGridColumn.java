@@ -8,20 +8,32 @@ package org.tablevert.core;
 /**
  * A single column within a {@link DataGrid} instance.
  */
-class DataGridColumn {
-    private String name;
-    private String className;
+final class DataGridColumn implements Cloneable {
+    private final int index;
+    private final String name;
+    private final String javaClassName;
 
-    DataGridColumn(String name, String className) {
+    DataGridColumn(int index, String name, String javaClassName) {
+        this.index = index;
         this.name = name;
-        this.className = className;
+        this.javaClassName = javaClassName;
+    }
+
+    int getIndex() {
+        return index;
     }
 
     String getName() {
         return name;
     }
 
-    String getClassName() {
-        return className;
+    String getJavaClassName() {
+        return javaClassName;
     }
+
+    @Override
+    protected DataGridColumn clone() {
+        return new DataGridColumn(index, name, javaClassName);
+    }
+
 }

@@ -120,7 +120,7 @@ class JdbcDatabaseReader implements DatabaseReader {
         List<DataGridColumn> columns = new ArrayList<>();
 
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-            DataGridColumn column = new DataGridColumn(metaData.getColumnName(i), metaData.getColumnClassName(i));
+            DataGridColumn column = new DataGridColumn(i - 1, metaData.getColumnName(i), metaData.getColumnClassName(i));
             dataGrid.addColumn(column);
         }
 
@@ -128,16 +128,16 @@ class JdbcDatabaseReader implements DatabaseReader {
     }
 
     private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException {
-        long rowCount = 0L;
+        int rowCount = 0;
         while (resultSet.next()) {
-            dataGrid.addRow(extractRow(resultSet, columnCount));
+            dataGrid.addRow(extractRow(rowCount, resultSet, columnCount));
             rowCount++;
         }
         return rowCount;
     }
 
-    private DataGridRow extractRow(ResultSet resultSet, int columnCount) throws SQLException {
-        DataGridRow row = new DataGridRow();
+    private DataGridRow extractRow(int rowIndex, ResultSet resultSet, int columnCount) throws SQLException {
+        DataGridRow row = new DataGridRow(rowIndex);
         for (int i = 1; i <= columnCount; i++) {
             Object value = resultSet.getObject(i);
             if (value != null) {

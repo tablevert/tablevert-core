@@ -14,7 +14,7 @@ import org.tablevert.core.config.TablevertConfig;
  *
  * @author doc-hil
  */
-public class SimpleTableverter implements Tableverter {
+public final class SimpleTableverter implements Tableverter {
 
     final Logger logger = LoggerFactory.getLogger(SimpleTableverter.class);
 
@@ -26,7 +26,44 @@ public class SimpleTableverter implements Tableverter {
 
     }
 
-    public String getDummyDummyString() {
-        return "Ain't this a dummy string?";
+    /**
+     * Provides the tablevert output for the specified query in the specified format.
+     *
+     * @param appliedQuery query with additional filtering and sorting
+     * @param outputFormat format expected for the tableversion's output
+     * @return the converted table
+     */
+    @Override
+    public Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws Exception {
+
+        DataGrid dataGrid = retrieveDataFor(appliedQuery);
+
+        OutputGenerator outputGenerator = selectGeneratorFor(outputFormat);
+        return outputGenerator.process(dataGrid);
     }
+
+    private DataGrid retrieveDataFor(AppliedQuery appliedQuery) throws Exception {
+        // TODO: Include non-database readers
+        DatabaseReader databaseReader = selectDatabaseReaderFor(appliedQuery);
+        return databaseReader.fetchData(null);
+    }
+
+    private DatabaseReader selectDatabaseReaderFor(AppliedQuery appliedQuery) throws BuilderFailedException {
+        // TODO: Include other readers and adapt to appliedQuery
+        return new JdbcDatabaseReader.Builder(DatabaseType.POSTGRESQL)
+                .forHost("localhost")
+                .forDatabase("dummy")
+                .withCredentials("x", "x")
+                .build();
+    }
+
+    private OutputGenerator selectGeneratorFor(OutputFormat outputFormat) {
+        switch (outputFormat) {
+            case XLSX:
+                return new XLSXOutputGenerator();
+            default:
+                throw new IllegalArgumentException("No OutputGenerator defined for OutputFormat " + outputFormat);
+        }
+    }
+
 }

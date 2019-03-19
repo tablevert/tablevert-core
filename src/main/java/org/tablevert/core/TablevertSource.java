@@ -8,7 +8,7 @@ package org.tablevert.core;
 /**
  * Data source of a tablevert operation.
  */
-public interface TablevertSource {
+interface TablevertSource {
     TablevertSourceType getSourceType();
 
     DataGrid fetchData(Object fetchInstruction) throws Exception;

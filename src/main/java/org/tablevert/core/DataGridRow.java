@@ -5,21 +5,26 @@
 
 package org.tablevert.core;
 
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A single row within a {@link DataGrid} object.
  */
-class DataGridRow {
-    private Map<Integer, Object> valueMap;
+final class DataGridRow {
 
-    DataGridRow() {
-        valueMap = new Hashtable<>();
+    private final int index;
+    private final Map<Integer, Object> valueMap;
+    private boolean valuesLocked;
+
+    DataGridRow(int index) {
+        this.index = index;
+        this.valueMap = new Hashtable<>();
+        this.valuesLocked = false;
     }
 
     void addReplaceValue(Integer colIndex, Object value) {
-        if (colIndex == null || value == null) {
+        if (valuesLocked || colIndex == null || value == null) {
             return;
         }
         if (valueMap.containsKey(colIndex)) {
@@ -27,5 +32,26 @@ class DataGridRow {
         } else {
             valueMap.put(colIndex, value);
         }
+    }
+
+    int getIndex() {
+        return index;
+    }
+
+    List<Integer> getColumnIndicesOfValues() {
+        return new ArrayList<>(valueMap.keySet());
+    }
+
+    Object getValue(int colIndex) {
+        lockValues();
+        if (!valueMap.containsKey(colIndex)) {
+            return null;
+        }
+        // TODO: Ensure read-only on the value
+        return valueMap.get(colIndex);
+    }
+
+    void lockValues() {
+        valuesLocked = true;
     }
 }
