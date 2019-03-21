@@ -16,6 +16,6 @@ interface OutputGenerator {
      * @param dataGrid the data to handle
      * @return the generated output
      */
-    Output process(DataGrid dataGrid);
+    Output process(DataGrid dataGrid) throws OutputGeneratorException;
 
 }

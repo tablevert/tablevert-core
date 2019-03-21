@@ -8,8 +8,8 @@ package org.tablevert.core;
 /**
  * Exception called when failing to execute {@link DatabaseReader} methods.
  */
-class DatabaseReaderException extends Exception {
-    public DatabaseReaderException(String message) {
+public class DatabaseReaderException extends Exception {
+    DatabaseReaderException(String message) {
         super(message);
     }
 }

@@ -19,10 +19,17 @@ class DatabaseQuery {
         this.query = query;
     }
 
+    /**
+     * @return the name of the query
+     */
     String getName() {
         return name;
     }
 
+    /**
+     *
+     * @return the query string
+     */
     String getQuery() {
         return query;
     }

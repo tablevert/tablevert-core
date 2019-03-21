@@ -7,7 +7,6 @@ package org.tablevert.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tablevert.core.config.TablevertConfig;
 
 /**
  * Simple implementation of the {@link org.tablevert.core.Tableverter} interface.
@@ -60,7 +59,7 @@ public final class SimpleTableverter implements Tableverter {
     private OutputGenerator selectGeneratorFor(OutputFormat outputFormat) {
         switch (outputFormat) {
             case XLSX:
-                return new XLSXOutputGenerator();
+                return new XlsxOutputGenerator();
             default:
                 throw new IllegalArgumentException("No OutputGenerator defined for OutputFormat " + outputFormat);
         }

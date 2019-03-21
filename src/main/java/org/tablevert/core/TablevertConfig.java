@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.tablevert.core.config;
+package org.tablevert.core;
 
 /**
  * Tablevert configuration to be passed to the Tableverter instance.
@@ -11,5 +11,7 @@ package org.tablevert.core.config;
  * @author doc-hil
  */
 public interface TablevertConfig {
+
+
 
 }
