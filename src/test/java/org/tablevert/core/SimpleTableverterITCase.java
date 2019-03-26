@@ -6,32 +6,58 @@
 package org.tablevert.core;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.tablevert.core.config.*;
 
-public class SimpleTableverterITCase {
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
+class SimpleTableverterITCase {
+
+    private static final String TESTDB_HOST = "localhost";
+    private static final String TESTDB_NAME = "HHSSecondTest";
+    private static final String TESTQUERY_NAME = "testQuery";
+    private static final String TESTUSER_NAME = "dummyreader";
+
 
     @Test
-    @Disabled("Yet incomplete")
-    public void readsDataFromPostgres() {
+    void tablevertsPostgresToXlsx() throws Exception {
         Tableverter tableverter = new SimpleTableverter(getConfigForPostgresTest());
-        Assertions.assertTrue(true);
+        AppliedDatabaseQuery appliedQuery = new AppliedDatabaseQuery.Builder()
+                .forBaseQuery(TESTQUERY_NAME)
+                .withUser(TESTUSER_NAME)
+                .build();
+        Output output = tableverter.tablevertFromDatabase(appliedQuery, OutputFormat.XLSX);
+        Assertions.assertNotNull(output);
+
+        // TODO: Remove this!!!
+        writeOutputToFile(output);
+
     }
 
-    private TablevertConfig getConfigForPostgresTest() {
+    private TablevertConfig getConfigForPostgresTest() throws Exception {
         TablevertConfig config = new SimpleTablevertConfig.Builder()
-                .withQuery(new DatabaseQuery(DatabaseType.POSTGRESQL, "testQuery", "SELECT * FROM mydummy;"))
+                .withDatabase(new Database.Builder()
+                        .forDatabase(TESTDB_NAME)
+                        .ofType(DatabaseType.POSTGRESQL)
+                        .onHost(TESTDB_HOST)
+                        .withUser(new DatabaseUser(TESTUSER_NAME, "test"))
+                        .build())
+                .withQuery(new DatabaseQuery.Builder()
+                        .withName(TESTQUERY_NAME)
+                        .accessingDatabase(TESTDB_NAME)
+                        .withStatement("SELECT * FROM mydummy;")
+                        .build())
+                .withUser(new DatabaseUser(TESTUSER_NAME, "test"))
                 .build();
         return config;
     }
 
-    private DataGrid fetchPostgresData() throws Exception {
-        DatabaseReader dbReader = new JdbcDatabaseReader.Builder(DatabaseType.POSTGRESQL)
-                .forHost("localhost")
-                .forDatabase("HHSSecondTest")
-                .withCredentials("dummyreader", "test")
-                .build();
-        DatabaseQuery databaseQuery = new DatabaseQuery(DatabaseType.POSTGRESQL, "testQuery", "SELECT * FROM mydummy;");
-        return dbReader.fetchData(databaseQuery);
+    private void writeOutputToFile(Output output) throws Exception {
+        if (output == null) {
+            return;
+        }
+        OutputStream outputStream = new FileOutputStream("target/simpletablevertertest_output.xlsx");
+        output.writeContent(outputStream);
     }
 }

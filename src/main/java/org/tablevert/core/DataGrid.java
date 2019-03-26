@@ -14,12 +14,10 @@ import java.util.stream.Collectors;
  */
 final class DataGrid {
 
-    private String queryName;
     private List<DataGridColumn> columns;
     private List<DataGridRow> rows;
 
-    DataGrid(String queryName) {
-        this.queryName = queryName;
+    DataGrid() {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
     }

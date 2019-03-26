@@ -30,7 +30,7 @@ public class XlsxOutputGeneratorTest {
     }
 
     private DataGrid createSimpleDataGrid() {
-        DataGrid dataGrid = new DataGrid("test");
+        DataGrid dataGrid = new DataGrid();
         dataGrid.addColumn(
                 new DataGridColumn(0, "A", CLASSNAME_STRING)
         );

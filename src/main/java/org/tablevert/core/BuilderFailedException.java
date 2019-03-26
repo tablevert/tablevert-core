@@ -8,7 +8,7 @@ package org.tablevert.core;
 /**
  * Exception declaring the failure of a tablevert Builder class.
  */
-class BuilderFailedException extends Exception {
+public class BuilderFailedException extends Exception {
     public BuilderFailedException(String message) {
         super(message);
     }

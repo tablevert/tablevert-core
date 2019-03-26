@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.tablevert.core;
+package org.tablevert.core.config;
 
-enum DatabaseType {
+public enum DatabaseType {
     POSTGRESQL("postgresql");
 
     private String name;
@@ -14,7 +14,7 @@ enum DatabaseType {
         this.name = name;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 }

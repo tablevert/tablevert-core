@@ -5,92 +5,97 @@
 
 package org.tablevert.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.tablevert.core.config.Database;
+import org.tablevert.core.config.DatabaseQuery;
+import org.tablevert.core.config.DatabaseType;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * {@link DatabaseReader} implementation for JDBC database access.
  */
 class JdbcDatabaseReader implements DatabaseReader {
 
-    static class Builder {
+    static class Builder implements DatabaseReader.Builder {
         private static final int DEFAULT_PORT_POSTGRESQL = 5432;
 
-        private static final Logger logger = LoggerFactory.getLogger(Builder.class);
         private JdbcDatabaseReader dbReader;
-        private DatabaseType databaseType;
-        private String dbName;
-        private String hostName;
+        private Database database;
         private String userName;
-        private String userSecret;
-        private int port;
+        private Integer port;
 
-        Builder(DatabaseType databaseType) {
-            this.databaseType = databaseType;
-            this.port = DEFAULT_PORT_POSTGRESQL;
-        }
-
-        Builder forHost(String hostName) {
-            this.hostName = hostName;
+        @Override
+        public Builder forDatabase(Database database) {
+            this.database = database;
             return this;
         }
 
-        Builder forDatabase(String dbName) {
-            this.dbName = dbName;
-            return this;
-        }
-
-        Builder withCredentials(String userName, String userSecret) {
+        @Override
+        public Builder withUser(String userName) {
             this.userName = userName;
-            this.userSecret = userSecret;
             return this;
         }
 
-        JdbcDatabaseReader build() throws BuilderFailedException {
-            try {
-
-                Class.forName("org.postgresql.Driver");
-            } catch (ClassNotFoundException e) {
-                throw new BuilderFailedException("Driver class is missing for database type '" + databaseType.getName() + "'");
+        @Override
+        public JdbcDatabaseReader build() throws BuilderFailedException {
+            if (port == null) {
+                port = selectDefaultPort();
             }
-            String errors = validate();
-            if (errors != null) {
-                throw new BuilderFailedException("Builder validation failed with errors: " + errors);
-            }
+            validate();
             dbReader = new JdbcDatabaseReader();
             dbReader.setConnectionString(assembleConnectionString());
-            dbReader.setCredentials(userName, userSecret);
+            dbReader.setCredentials(userName, database.getUserSecret(userName));
             return dbReader;
         }
 
         private String assembleConnectionString() {
             return "jdbc:"
-                    + databaseType.getName() + "://"
-                    + hostName + ":"
+                    + database.getDbType().getName() + "://"
+                    + database.getHost() + ":"
                     + port + "/"
-                    + dbName;
+                    + database.getName();
         }
 
-        private String validate() {
+        private void validate() throws BuilderFailedException {
             String errors = "";
-            if (hostName == null || hostName.isEmpty()) {
-                errors += "- host name not specified";
+            if (database == null) {
+                errors += "- database not specified";
+            } else {
+                try {
+                    Class.forName(selectJdbcDriverClassName());
+                } catch (ClassNotFoundException e) {
+                    errors += "- driver class is missing for database type [" + database.getDbType().getName() + "]";
+                }
             }
-            if (dbName == null || dbName.isEmpty()) {
-                errors += "- database name not specified";
-            }
-            if (userName == null || userName.isEmpty() || userSecret == null || userSecret.isEmpty()) {
-                errors += "- invalid credentials";
+            if (userName == null || userName.isEmpty()) {
+                errors += "- user not specified";
             }
             if (!errors.isEmpty()) {
-                logger.error("Could not build JdbcDatabaseReader object: " + errors);
-                return errors;
+                throw new BuilderFailedException("Builder validation failed with errors: " + errors);
             }
-            return null;
+        }
+
+        private Integer selectDefaultPort() throws BuilderFailedException {
+            if (database == null) {
+                return null;
+            }
+            switch (database.getDbType()) {
+                case POSTGRESQL:
+                    return DEFAULT_PORT_POSTGRESQL;
+                default:
+                    throw new BuilderFailedException("No default port available for database type ["
+                            + database.getDbType().name() + "]");
+            }
+        }
+
+        private String selectJdbcDriverClassName() throws BuilderFailedException {
+            switch (database.getDbType()) {
+                case POSTGRESQL:
+                    return "org.postgresql.Driver";
+                default:
+                    throw new BuilderFailedException("No JDBC driver class name available for database type ["
+                            + database.getDbType().name() + "]");
+            }
         }
     }
 
@@ -101,14 +106,15 @@ class JdbcDatabaseReader implements DatabaseReader {
     private JdbcDatabaseReader() {
     }
 
-    public DataGrid fetchData(DatabaseQuery databaseQuery) throws Exception {
+    // TODO: Switch to applied query
+    public DataGrid fetchData(String queryStatement) throws Exception {
         try (Connection connection = openConnection()) {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(databaseQuery.getQuery());
+            ResultSet resultSet = statement.executeQuery(queryStatement);
 
             ResultSetMetaData metaData = resultSet.getMetaData();
 
-            DataGrid dataGrid = new DataGrid(databaseQuery.getName());
+            DataGrid dataGrid = new DataGrid();
             int columnCount = extractColumns(dataGrid, metaData);
             extractRows(dataGrid, resultSet, columnCount);
 
@@ -117,8 +123,6 @@ class JdbcDatabaseReader implements DatabaseReader {
     }
 
     private int extractColumns(DataGrid dataGrid, ResultSetMetaData metaData) throws SQLException {
-        List<DataGridColumn> columns = new ArrayList<>();
-
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             DataGridColumn column = new DataGridColumn(i - 1, metaData.getColumnName(i), metaData.getColumnClassName(i));
             dataGrid.addColumn(column);
@@ -141,7 +145,7 @@ class JdbcDatabaseReader implements DatabaseReader {
         for (int i = 1; i <= columnCount; i++) {
             Object value = resultSet.getObject(i);
             if (value != null) {
-                row.addReplaceValue(i, value);
+                row.addReplaceValue(i - 1, value);
             }
         }
         return row;
@@ -164,6 +168,5 @@ class JdbcDatabaseReader implements DatabaseReader {
                     + connectionString);
         }
     }
-
 
 }
