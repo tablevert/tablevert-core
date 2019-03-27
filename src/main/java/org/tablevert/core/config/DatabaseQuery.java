@@ -32,7 +32,7 @@ public class DatabaseQuery {
             return this;
         }
 
-        public DatabaseQuery build()throws BuilderFailedException {
+        public DatabaseQuery build() throws BuilderFailedException {
             validate();
             DatabaseQuery query = new DatabaseQuery();
             query.name = this.name;
@@ -51,8 +51,7 @@ public class DatabaseQuery {
             }
             if (queryStatement == null || queryStatement.isEmpty()) {
                 errors += "- query statement not specified";
-            }
-            if (!"select".equals(queryStatement.substring(0, 6).toLowerCase())) {
+            } else if (!"select".equals(queryStatement.substring(0, 6).toLowerCase())) {
                 errors += "- query statement [" + queryStatement + "] does not start with 'select' (case-insensitive)";
             }
             if (!errors.isEmpty()) {
@@ -69,7 +68,6 @@ public class DatabaseQuery {
     }
 
     /**
-     *
      * @return the name of the query
      */
     public String getName() {
@@ -77,7 +75,6 @@ public class DatabaseQuery {
     }
 
     /**
-     *
      * @return the name of the database to access
      */
     public String getDatabaseName() {
@@ -85,7 +82,6 @@ public class DatabaseQuery {
     }
 
     /**
-     *
      * @return the query statement
      */
     public String getQueryStatement() {

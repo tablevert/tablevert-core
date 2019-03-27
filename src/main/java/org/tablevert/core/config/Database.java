@@ -5,6 +5,8 @@
 
 package org.tablevert.core.config;
 
+import org.tablevert.core.BuilderFailedException;
+
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -48,14 +50,33 @@ public class Database implements Cloneable {
             return this;
         }
 
-        public Database build() {
-            // TODO: Include validation
+        public Database build() throws BuilderFailedException {
+            validate();
             Database database = new Database();
             database.dbType = this.dbType;
             database.name = this.name;
             database.host = this.host;
             database.userMap = this.userMap;
             return database;
+        }
+
+        private void validate() throws BuilderFailedException {
+            String errors = "";
+            if (name == null || name.isEmpty()) {
+                errors += "- database name not specified";
+            }
+            if (dbType == null) {
+                errors += "- database type not specified";
+            }
+            if (host == null || host.isEmpty()) {
+                errors += "- host not specified";
+            }
+            if (userMap == null || userMap.isEmpty()) {
+                errors += "- no users specified";
+            }
+            if (!errors.isEmpty()) {
+                throw new BuilderFailedException("Builder validation failed with errors: " + errors);
+            }
         }
 
     }
@@ -92,11 +113,15 @@ public class Database implements Cloneable {
     }
 
     public Database clone() {
-        Builder cloneBuilder = new Builder()
-                .forDatabase(name)
-                .ofType(dbType)
-                .onHost(host);
-        this.userMap.entrySet().stream().forEach(user -> cloneBuilder.withUser(user.getValue().clone()));
-        return cloneBuilder.build();
+        try {
+            Builder cloneBuilder = new Builder()
+                    .forDatabase(name)
+                    .ofType(dbType)
+                    .onHost(host);
+            this.userMap.entrySet().stream().forEach(user -> cloneBuilder.withUser(user.getValue().clone()));
+            return cloneBuilder.build();
+        } catch (BuilderFailedException e) {
+            throw new IllegalStateException("Builder should never fail in clone()");
+        }
     }
 }

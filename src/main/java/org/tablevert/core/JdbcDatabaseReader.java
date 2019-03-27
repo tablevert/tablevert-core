@@ -68,6 +68,10 @@ class JdbcDatabaseReader implements DatabaseReader {
             if (userName == null || userName.isEmpty()) {
                 errors += "- user not specified";
             }
+            else if (database != null && database.getUserSecret(userName) == null) {
+                errors += "- user [" + userName + "] not configured for database ["
+                        + (database.getName() == null ? "??" : database.getName()) + "]";
+            }
             if (!errors.isEmpty()) {
                 throw new BuilderFailedException("Builder validation failed with errors: " + errors);
             }
