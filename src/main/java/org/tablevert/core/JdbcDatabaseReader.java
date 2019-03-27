@@ -6,8 +6,6 @@
 package org.tablevert.core;
 
 import org.tablevert.core.config.Database;
-import org.tablevert.core.config.DatabaseQuery;
-import org.tablevert.core.config.DatabaseType;
 
 import java.sql.*;
 
@@ -106,8 +104,8 @@ class JdbcDatabaseReader implements DatabaseReader {
     private JdbcDatabaseReader() {
     }
 
-    // TODO: Switch to applied query
-    public DataGrid fetchData(String queryStatement) throws Exception {
+    @Override
+    public DataGrid read(String queryStatement) throws Exception {
         try (Connection connection = openConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(queryStatement);
@@ -134,13 +132,13 @@ class JdbcDatabaseReader implements DatabaseReader {
     private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException {
         int rowCount = 0;
         while (resultSet.next()) {
-            dataGrid.addRow(extractRow(rowCount, resultSet, columnCount));
+            dataGrid.addRow(extractSingleRow(rowCount, resultSet, columnCount));
             rowCount++;
         }
         return rowCount;
     }
 
-    private DataGridRow extractRow(int rowIndex, ResultSet resultSet, int columnCount) throws SQLException {
+    private DataGridRow extractSingleRow(int rowIndex, ResultSet resultSet, int columnCount) throws SQLException {
         DataGridRow row = new DataGridRow(rowIndex);
         for (int i = 1; i <= columnCount; i++) {
             Object value = resultSet.getObject(i);

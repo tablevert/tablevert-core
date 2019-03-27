@@ -13,19 +13,17 @@ import org.tablevert.core.config.DatabaseType;
 import org.tablevert.core.config.TablevertConfig;
 
 /**
- * Simple implementation of the {@link org.tablevert.core.Tableverter} interface.
- *
- * @author doc-hil
+ * Implementation of the {@link org.tablevert.core.Tableverter} interface for database sources.
  */
-public final class SimpleTableverter implements Tableverter {
+public final class DatabaseTableverter implements Tableverter {
 
-    private final Logger logger = LoggerFactory.getLogger(SimpleTableverter.class);
+    private final Logger logger = LoggerFactory.getLogger(DatabaseTableverter.class);
 
     private TablevertConfig tablevertConfig;
 
-    public SimpleTableverter(TablevertConfig config) {
+    public DatabaseTableverter(TablevertConfig config) {
         this.tablevertConfig = config;
-        logger.info("Set up SimpleTableverter");
+        logger.info("Set up DatabaseTableverter");
     }
 
     /**
@@ -36,27 +34,31 @@ public final class SimpleTableverter implements Tableverter {
      * @return the converted table
      */
     @Override
-    public Output tablevertFromDatabase(AppliedDatabaseQuery appliedQuery, OutputFormat outputFormat) throws Exception {
-        DataGrid dataGrid = retrieveDatabaseDataFor(appliedQuery);
+    public Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws Exception {
+        DataGrid dataGrid = retrieveDataFor(appliedQuery);
+        return generateOutput(dataGrid, outputFormat);
+    }
+
+    private DataGrid retrieveDataFor(AppliedQuery appliedQuery) throws Exception {
+        DatabaseReader databaseReader = prepareReaderFor(appliedQuery);
+        return databaseReader.read(composeEffectiveQueryStatement(appliedQuery));
+    }
+
+    private Output generateOutput(DataGrid dataGrid, OutputFormat outputFormat) throws Exception {
         OutputGenerator outputGenerator = selectGeneratorFor(outputFormat);
         return outputGenerator.process(dataGrid);
     }
 
-    private DataGrid retrieveDatabaseDataFor(AppliedDatabaseQuery appliedQuery) throws Exception {
-        DatabaseReader databaseReader = prepareDatabaseReaderFor(appliedQuery);
-        return databaseReader.fetchData(composeEffectiveQueryStatement(appliedQuery));
-    }
-
-    private DatabaseReader prepareDatabaseReaderFor(AppliedDatabaseQuery appliedQuery) throws BuilderFailedException {
+    private DatabaseReader prepareReaderFor(AppliedQuery appliedQuery) throws BuilderFailedException {
         Database database = tablevertConfig.getDatabaseForQuery(appliedQuery.getBaseQueryName());
-        DatabaseReader.Builder readerBuilder = selectReaderBuilderForDatabaseType(database.getDbType());
+        DatabaseReader.Builder readerBuilder = selectReaderBuilderFor(database.getDbType());
         return readerBuilder
                 .forDatabase(database)
                 .withUser(appliedQuery.getUserName())
                 .build();
     }
 
-    private DatabaseReader.Builder selectReaderBuilderForDatabaseType(DatabaseType dbType) throws BuilderFailedException {
+    private DatabaseReader.Builder selectReaderBuilderFor(DatabaseType dbType) throws BuilderFailedException {
         switch (dbType) {
             case POSTGRESQL:
                 return new JdbcDatabaseReader.Builder();
@@ -75,7 +77,7 @@ public final class SimpleTableverter implements Tableverter {
         }
     }
 
-    private String composeEffectiveQueryStatement(AppliedDatabaseQuery appliedQuery) {
+    private String composeEffectiveQueryStatement(AppliedQuery appliedQuery) {
         // TODO: Integrate applied filtering and sorting
         DatabaseQuery databaseQuery = tablevertConfig.getDatabaseQuery(appliedQuery.getBaseQueryName());
         return databaseQuery.getQueryStatement();

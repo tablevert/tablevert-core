@@ -12,7 +12,7 @@ import org.tablevert.core.config.*;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-class SimpleTableverterITCase {
+class DatabaseTableverterITCase {
 
     private static final String TESTDB_HOST = "localhost";
     private static final String TESTDB_NAME = "HHSSecondTest";
@@ -22,12 +22,12 @@ class SimpleTableverterITCase {
 
     @Test
     void tablevertsPostgresToXlsx() throws Exception {
-        Tableverter tableverter = new SimpleTableverter(getConfigForPostgresTest());
+        Tableverter tableverter = new DatabaseTableverter(getConfigForPostgresTest());
         AppliedDatabaseQuery appliedQuery = new AppliedDatabaseQuery.Builder()
-                .forBaseQuery(TESTQUERY_NAME)
+                .forDatabaseQuery(TESTQUERY_NAME)
                 .withUser(TESTUSER_NAME)
                 .build();
-        Output output = tableverter.tablevertFromDatabase(appliedQuery, OutputFormat.XLSX);
+        Output output = tableverter.tablevert(appliedQuery, OutputFormat.XLSX);
         Assertions.assertNotNull(output);
 
         // TODO: Remove this!!!

@@ -35,7 +35,7 @@ public class JdbcDatabaseReaderITCase {
                 .accessingDatabase("HHSSecondTest")
                 .withStatement(DBQUERY_SIMPLE)
                 .build();
-        return dbReader.fetchData(DBQUERY_SIMPLE);
+        return dbReader.read(DBQUERY_SIMPLE);
     }
 
 }

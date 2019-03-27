@@ -21,6 +21,6 @@ interface DatabaseReader {
         DatabaseReader build() throws BuilderFailedException;
     }
 
-    DataGrid fetchData(String queryStatement) throws Exception;
+    DataGrid read(String queryStatement) throws Exception;
 
 }

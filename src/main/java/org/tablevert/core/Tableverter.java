@@ -5,6 +5,8 @@
 
 package org.tablevert.core;
 
+import org.tablevert.core.config.TablevertConfig;
+
 /**
  * Entry point for providing the tablevert conversion functionality.
  *
@@ -13,14 +15,12 @@ package org.tablevert.core;
 public interface Tableverter {
 
     /**
-     * Retrieves source table data from a database and converts it to the requested format.
+     * Retrieves source table data and converts it to the requested format.
      *
-     * @param appliedQuery database query with additional filtering and sorting
+     * @param appliedQuery query with context-related filtering and sorting
      * @param outputFormat format expected for the tableversion's output
      * @return the converted table
      */
-    Output tablevertFromDatabase(AppliedDatabaseQuery appliedQuery, OutputFormat outputFormat) throws Exception;
-
-
+    Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws Exception;
 
 }
