@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -81,9 +82,26 @@ final class XlsxOutputGenerator implements OutputGenerator {
                 if (value != null) {
                     XSSFCell cell = sheetRow.createCell(colIndex);
                     // TODO: Add appropriate formatting
-                    cell.setCellValue(value.toString());
+                    setCellValue(cell, value);
                     cell.setCellStyle(cellStyleMap.get(CELLSTYLE_BODY));
                 }
+            }
+        }
+
+        private void setCellValue(XSSFCell cell, Object value) {
+            Class valueClass = value.getClass();
+            if (String.class.equals(valueClass)) {
+                cell.setCellValue((String) value);
+            } else if (Integer.class.equals(valueClass)) {
+                cell.setCellValue(((Integer) value).doubleValue());
+            } else if (Long.class.equals(valueClass)) {
+                cell.setCellValue(((Long) value).doubleValue());
+            } else if (Double.class.equals(valueClass)) {
+                cell.setCellValue((Double) value);
+            } else if (Date.class.equals(valueClass)) {
+                cell.setCellValue((Date) value);
+            } else {
+                cell.setCellValue(value.toString());
             }
         }
 

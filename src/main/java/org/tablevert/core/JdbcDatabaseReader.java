@@ -8,6 +8,8 @@ package org.tablevert.core;
 import org.tablevert.core.config.Database;
 
 import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * {@link DatabaseReader} implementation for JDBC database access.
@@ -134,23 +136,41 @@ class JdbcDatabaseReader implements DatabaseReader {
     }
 
     private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException {
+        List<JdbcValueConversionType> conversionTypes = getConversionTypes(dataGrid.cloneColumns());
         int rowCount = 0;
         while (resultSet.next()) {
-            dataGrid.addRow(extractSingleRow(rowCount, resultSet, columnCount));
+            dataGrid.addRow(extractSingleRow(rowCount, resultSet, columnCount, conversionTypes));
             rowCount++;
         }
         return rowCount;
     }
 
-    private DataGridRow extractSingleRow(int rowIndex, ResultSet resultSet, int columnCount) throws SQLException {
+    private DataGridRow extractSingleRow(int rowIndex, ResultSet resultSet, int columnCount,
+                                         List<JdbcValueConversionType> conversionTypes) throws SQLException {
         DataGridRow row = new DataGridRow(rowIndex);
-        for (int i = 1; i <= columnCount; i++) {
-            Object value = resultSet.getObject(i);
+        for (int i = 0; i < columnCount; i++) {
+            Object value = getSingleValue(resultSet, i + 1, conversionTypes.get(i));
             if (value != null) {
-                row.addReplaceValue(i - 1, value);
+                row.addReplaceValue(i, value);
             }
         }
         return row;
+    }
+
+    private Object getSingleValue(ResultSet resultSet, int index, JdbcValueConversionType conversionType) throws SQLException {
+        if (conversionType == null || JdbcValueConversionType.STRING.equals(conversionType)) {
+            return resultSet.getString(index);
+        }
+        return resultSet.getObject(index);
+    }
+
+    private List<JdbcValueConversionType> getConversionTypes(List<DataGridColumn> columns) {
+        List<JdbcValueConversionType> conversionTypes = new ArrayList<>();
+        columns.stream()
+                .sorted(Comparator.comparingInt(col -> col.getIndex()))
+                .forEach(col -> conversionTypes.add(col.getJavaClassName().startsWith("java")
+                        ? JdbcValueConversionType.OBJECT : JdbcValueConversionType.STRING));
+        return conversionTypes;
     }
 
     private void setConnectionString(String connectionString) {

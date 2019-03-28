@@ -16,8 +16,4 @@ public interface TablevertConfig {
 
     Database getDatabaseForQuery(String queryName);
 
-    DatabaseType getDatabaseTypeForQuery(String queryName);
-
-    String getHostNameForDatabaseQuery(String queryName);
-
 }

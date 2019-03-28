@@ -30,32 +30,17 @@ public class SimpleTablevertConfig implements TablevertConfig {
         }
 
         public Builder withDatabase(Database database) {
-            String key = database.getName();
-            if (databaseMap.containsKey(key)) {
-                databaseMap.replace(key, database);
-            } else {
-                databaseMap.put(key, database);
-            }
+            putOrReplace(databaseMap, database.getName(), database);
             return this;
         }
 
         public Builder withQuery(DatabaseQuery query) {
-            String key = query.getName();
-            if (queryMap.containsKey(key)) {
-                queryMap.replace(key, query);
-            } else {
-                queryMap.put(key, query);
-            }
+            putOrReplace(queryMap, query.getName(), query);
             return this;
         }
 
         public Builder withUser(DatabaseUser user) {
-            String key = user.getName();
-            if (userMap.containsKey(key)) {
-                userMap.replace(key, user);
-            } else {
-                userMap.put(key, user);
-            }
+            putOrReplace(userMap, user.getName(), user);
             return this;
         }
 
@@ -64,6 +49,14 @@ public class SimpleTablevertConfig implements TablevertConfig {
             config.queryMap = this.queryMap;
             config.databaseMap = this.databaseMap;
             return config;
+        }
+
+        private void putOrReplace(Map map, String key, Object value) {
+            if (map.containsKey(key)) {
+                map.replace(key, value);
+            } else {
+                map.put(key, value);
+            }
         }
     }
 
@@ -84,15 +77,4 @@ public class SimpleTablevertConfig implements TablevertConfig {
                 ? null : databaseMap.get(databaseQuery.getDatabaseName()).clone();
     }
 
-    public DatabaseType getDatabaseTypeForQuery(String queryName) {
-        DatabaseQuery databaseQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
-        return (databaseQuery == null || !databaseMap.containsKey(databaseQuery.getDatabaseName()))
-                ? null : databaseMap.get(databaseQuery.getDatabaseName()).getDbType();
-    }
-
-    public String getHostNameForDatabaseQuery(String queryName) {
-        DatabaseQuery databaseQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
-        return (databaseQuery == null || !databaseMap.containsKey(databaseQuery.getDatabaseName()))
-                ? null : databaseMap.get(databaseQuery.getDatabaseName()).getHost();
-    }
 }

@@ -57,7 +57,7 @@ class DatabaseTableverterITCase {
         if (output == null) {
             return;
         }
-        OutputStream outputStream = new FileOutputStream("target/simpletablevertertest_output.xlsx");
+        OutputStream outputStream = new FileOutputStream("target/databasetablevertertest_output.xlsx");
         output.writeContent(outputStream);
     }
 }
