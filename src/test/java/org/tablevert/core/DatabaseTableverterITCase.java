@@ -48,7 +48,6 @@ class DatabaseTableverterITCase {
                         .accessingDatabase(TESTDB_NAME)
                         .withStatement("SELECT * FROM mydummy;")
                         .build())
-                .withUser(new DatabaseUser(TESTUSER_NAME, "test"))
                 .build();
         return config;
     }

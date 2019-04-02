@@ -7,6 +7,7 @@ package org.tablevert.core.config;
 
 import javax.xml.crypto.Data;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,13 +35,26 @@ public class SimpleTablevertConfig implements TablevertConfig {
             return this;
         }
 
+        public Builder withDatabases(List<Database> databases) {
+            if (databases != null) {
+                for (Database database : databases) {
+                    withDatabase(database);
+                }
+            }
+            return this;
+        }
+
         public Builder withQuery(DatabaseQuery query) {
             putOrReplace(queryMap, query.getName(), query);
             return this;
         }
 
-        public Builder withUser(DatabaseUser user) {
-            putOrReplace(userMap, user.getName(), user);
+        public Builder withQueries(List<DatabaseQuery> queries) {
+            if (queries != null) {
+                for (DatabaseQuery query : queries) {
+                    withQuery(query);
+                }
+            }
             return this;
         }
 

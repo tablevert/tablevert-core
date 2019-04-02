@@ -8,6 +8,7 @@ package org.tablevert.core.config;
 import org.tablevert.core.BuilderFailedException;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +47,15 @@ public class Database implements Cloneable {
                 this.userMap.replace(key, user);
             } else {
                 this.userMap.put(key, user);
+            }
+            return this;
+        }
+
+        public Builder withUsers(List<DatabaseUser> users) {
+            if (users != null) {
+                for (DatabaseUser user : users) {
+                    withUser(user);
+                }
             }
             return this;
         }
