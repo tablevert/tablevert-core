@@ -6,12 +6,9 @@
 package org.tablevert.core;
 
 import org.tablevert.core.config.Database;
-import org.tablevert.core.config.DatabaseQuery;
 
 /**
  * Source data provider for databases.
- *
- * @author doc-hil
  */
 interface DatabaseReader {
 
@@ -21,6 +18,6 @@ interface DatabaseReader {
         DatabaseReader build() throws BuilderFailedException;
     }
 
-    DataGrid read(String queryStatement) throws Exception;
+    DataGrid read(String queryStatement) throws TablevertCoreException;
 
 }

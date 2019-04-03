@@ -9,7 +9,6 @@ import org.tablevert.core.config.Database;
 
 import java.sql.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * {@link DatabaseReader} implementation for JDBC database access.
@@ -111,7 +110,7 @@ class JdbcDatabaseReader implements DatabaseReader {
     }
 
     @Override
-    public DataGrid read(String queryStatement) throws Exception {
+    public DataGrid read(String queryStatement) throws TablevertCoreException {
         try (Connection connection = openConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(queryStatement);
@@ -123,6 +122,8 @@ class JdbcDatabaseReader implements DatabaseReader {
             extractRows(dataGrid, resultSet, columnCount);
 
             return dataGrid;
+        } catch (SQLException e) {
+            throw new DatabaseReaderException(e);
         }
     }
 

@@ -16,4 +16,6 @@ public interface TablevertConfig {
 
     Database getDatabaseForQuery(String queryName);
 
+    TablevertConfig clone();
+
 }

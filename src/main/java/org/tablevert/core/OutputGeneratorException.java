@@ -8,7 +8,7 @@ package org.tablevert.core;
 /**
  * Exception thrown by a subclass of {@link OutputGenerator}.
  */
-public class OutputGeneratorException extends Exception {
+public class OutputGeneratorException extends TablevertCoreException {
     OutputGeneratorException(String message) {
         super(message);
     }

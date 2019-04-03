@@ -34,17 +34,17 @@ public final class DatabaseTableverter implements Tableverter {
      * @return the converted table
      */
     @Override
-    public Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws Exception {
+    public Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws TablevertCoreException {
         DataGrid dataGrid = retrieveDataFor(appliedQuery);
         return generateOutput(dataGrid, outputFormat);
     }
 
-    private DataGrid retrieveDataFor(AppliedQuery appliedQuery) throws Exception {
+    private DataGrid retrieveDataFor(AppliedQuery appliedQuery) throws TablevertCoreException {
         DatabaseReader databaseReader = prepareReaderFor(appliedQuery);
         return databaseReader.read(composeEffectiveQueryStatement(appliedQuery));
     }
 
-    private Output generateOutput(DataGrid dataGrid, OutputFormat outputFormat) throws Exception {
+    private Output generateOutput(DataGrid dataGrid, OutputFormat outputFormat) throws TablevertCoreException {
         OutputGenerator outputGenerator = selectGeneratorFor(outputFormat);
         return outputGenerator.process(dataGrid);
     }

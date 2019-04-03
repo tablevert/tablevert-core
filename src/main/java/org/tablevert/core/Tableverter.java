@@ -5,8 +5,6 @@
 
 package org.tablevert.core;
 
-import org.tablevert.core.config.TablevertConfig;
-
 /**
  * Entry point for providing the tablevert conversion functionality.
  *
@@ -21,6 +19,6 @@ public interface Tableverter {
      * @param outputFormat format expected for the tableversion's output
      * @return the converted table
      */
-    Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws Exception;
+    Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws TablevertCoreException;
 
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Simple implementation of the {@link TablevertConfig} interface.
  */
-public class SimpleTablevertConfig implements TablevertConfig {
+public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
 
     /**
      * Builder for SimpleTablevertConfig instances.
@@ -89,6 +89,20 @@ public class SimpleTablevertConfig implements TablevertConfig {
         DatabaseQuery databaseQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
         return (databaseQuery == null || !databaseMap.containsKey(databaseQuery.getDatabaseName()))
                 ? null : databaseMap.get(databaseQuery.getDatabaseName()).clone();
+    }
+
+    /**
+     * Creates a deep clone of this object.
+     * @return the clone
+     */
+    @Override
+    public SimpleTablevertConfig clone() {
+        SimpleTablevertConfig config = new SimpleTablevertConfig();
+        config.queryMap = new Hashtable<>();
+        this.queryMap.forEach((key, value) -> config.queryMap.put(key, value.clone()));
+        config.databaseMap = new Hashtable<>();
+        this.databaseMap.forEach((key, value) -> config.databaseMap.put(key, value.clone()));
+        return config;
     }
 
 }
