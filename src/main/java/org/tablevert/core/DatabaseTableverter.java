@@ -21,7 +21,7 @@ public final class DatabaseTableverter implements Tableverter {
 
     private TablevertConfig tablevertConfig;
 
-    public DatabaseTableverter(TablevertConfig config) {
+    DatabaseTableverter(TablevertConfig config) {
         this.tablevertConfig = config;
         logger.info("Set up DatabaseTableverter");
     }

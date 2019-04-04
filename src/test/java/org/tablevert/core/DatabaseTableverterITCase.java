@@ -22,7 +22,8 @@ class DatabaseTableverterITCase {
 
     @Test
     void tablevertsPostgresToXlsx() throws Exception {
-        Tableverter tableverter = new DatabaseTableverter(getConfigForPostgresTest());
+        TableverterFactory factory = new TableverterFactory();
+        Tableverter tableverter = factory.createDatabaseTableverterFor(getConfigForPostgresTest());
         AppliedDatabaseQuery appliedQuery = new AppliedDatabaseQuery.Builder()
                 .forDatabaseQuery(TESTQUERY_NAME)
                 .withUser(TESTUSER_NAME)
