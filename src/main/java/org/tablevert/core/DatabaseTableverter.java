@@ -7,10 +7,10 @@ package org.tablevert.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tablevert.core.config.Database;
-import org.tablevert.core.config.DatabaseQuery;
-import org.tablevert.core.config.DatabaseType;
-import org.tablevert.core.config.TablevertConfig;
+import org.tablevert.core.config.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of the {@link org.tablevert.core.Tableverter} interface for database sources.
@@ -64,7 +64,7 @@ public final class DatabaseTableverter implements Tableverter {
                 return new JdbcDatabaseReader.Builder();
             default:
                 throw new BuilderFailedException("No DatabaseReader.Builder implementation found for database type ["
-                + dbType.name() + "]");
+                        + dbType.name() + "]");
         }
     }
 
@@ -80,7 +80,25 @@ public final class DatabaseTableverter implements Tableverter {
     private String composeEffectiveQueryStatement(AppliedQuery appliedQuery) {
         // TODO: Integrate applied filtering and sorting
         DatabaseQuery databaseQuery = tablevertConfig.getDatabaseQuery(appliedQuery.getBaseQueryName());
-        return databaseQuery.getQueryStatement();
+        DatabaseType databaseType = tablevertConfig.getDatabaseForQuery(databaseQuery.getName()).getDbType();
+
+        List<DatabaseQueryColumn> columnsToSelect = databaseQuery.getColumnsToSelect();
+
+        String queryStatement = String.format(databaseType.getSelectStatementTemplate(),
+                composeColumnsStringFor(columnsToSelect),
+                databaseQuery.getFromClause(),
+                "",
+                "");
+
+
+        return queryStatement;
+    }
+
+    private String composeColumnsStringFor(List<DatabaseQueryColumn> columnsToSelect) {
+        List<String> columns = new ArrayList<>();
+        columnsToSelect.forEach(column ->
+                columns.add((column.getFormula() == null ? "" : (column.getFormula() + " AS ")) + column.getName()));
+        return String.join(",", columns);
     }
 
 }

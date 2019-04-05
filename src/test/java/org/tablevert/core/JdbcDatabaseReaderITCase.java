@@ -8,7 +8,6 @@ package org.tablevert.core;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.tablevert.core.config.Database;
-import org.tablevert.core.config.DatabaseQuery;
 import org.tablevert.core.config.DatabaseType;
 import org.tablevert.core.config.DatabaseUser;
 
@@ -18,6 +17,7 @@ public class JdbcDatabaseReaderITCase {
 
     @Test
     public void retrievesPostgresData() {
+        // TODO: Switch to container-based testing!!!
         Assertions.assertDoesNotThrow(() -> fetchPostgresData());
     }
 
@@ -29,11 +29,6 @@ public class JdbcDatabaseReaderITCase {
                         .onHost("localhost")
                         .withUser(new DatabaseUser("dummyreader", "test")).build())
                 .withUser("dummyreader")
-                .build();
-        DatabaseQuery databaseQuery = new DatabaseQuery.Builder()
-                .withName("testQuery")
-                .accessingDatabase("HHSSecondTest")
-                .withStatement(DBQUERY_SIMPLE)
                 .build();
         return dbReader.read(DBQUERY_SIMPLE);
     }

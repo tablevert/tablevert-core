@@ -11,12 +11,21 @@ import org.tablevert.core.config.*;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 class DatabaseTableverterITCase {
 
     private static final String TESTDB_HOST = "localhost";
     private static final String TESTDB_NAME = "HHSSecondTest";
+
     private static final String TESTQUERY_NAME = "testQuery";
+    private static final String TESTQUERY_COLUMN_A_FORMULA = "LEFT(description, 4)";
+    private static final String TESTQUERY_COLUMN_A_NAME = "description";
+    private static final String TESTQUERY_COLUMN_B_NAME = "id";
+    private static final String TESTQUERY_FROM = "mydummy";
+    private static final String TESTQUERY_WHERE = "id < 2";
+
     private static final String TESTUSER_NAME = "dummyreader";
 
 
@@ -47,12 +56,28 @@ class DatabaseTableverterITCase {
                 .withQuery(new DatabaseQuery.Builder()
                         .withName(TESTQUERY_NAME)
                         .accessingDatabase(TESTDB_NAME)
-                        .withStatement("SELECT * FROM mydummy;")
+                        .selectingColumns(createValidColumns())
+                        .selectingFrom(TESTQUERY_FROM)
+                        .applyingFilter(TESTQUERY_WHERE)
+                        .withSorting(createValidSorting())
                         .build())
                 .build();
         return config;
     }
 
+    private List<DatabaseQueryColumn> createValidColumns() {
+        List<DatabaseQueryColumn> columns = new ArrayList<>();
+        columns.add(new DatabaseQueryColumn(TESTQUERY_COLUMN_A_FORMULA, TESTQUERY_COLUMN_A_NAME));
+        columns.add(new DatabaseQueryColumn(TESTQUERY_COLUMN_B_NAME));
+        return columns;
+    }
+
+    private List<String> createValidSorting() {
+        List<String> sorting = new ArrayList<>();
+        sorting.add(TESTQUERY_COLUMN_B_NAME);
+        sorting.add("-" + TESTQUERY_COLUMN_A_NAME);
+        return sorting;
+    }
     private void writeOutputToFile(Output output) throws Exception {
         if (output == null) {
             return;

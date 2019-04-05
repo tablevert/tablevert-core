@@ -17,4 +17,11 @@ public enum DatabaseType {
     public String getName() {
         return name;
     }
+
+    public String getSelectStatementTemplate() {
+        switch (this) {
+            default:
+                return "SELECT %s FROM %s %s %s;";
+        }
+    }
 }
