@@ -7,61 +7,104 @@ package org.tablevert.core;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.tablevert.core.config.Database;
-import org.tablevert.core.config.DatabaseType;
-import org.tablevert.core.config.DatabaseUser;
+import org.tablevert.core.config.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class JdbcDatabaseReaderBuilderTest {
 
+    private static final String TESTDB_NAME = "dummyDb";
     private static final String TESTDB_USER_NAME = "tester";
-    private static final String TESTDB_NOUSER_NAME = "nouser";
+
+    private static final String TESTQUERY_NAME = "TestQuery";
 
     private static final String BUILDER_FAILED_MESSAGE = "Builder validation failed";
 
     @Test
     void succeedsWithValidData() {
         JdbcDatabaseReader.Builder builder = new JdbcDatabaseReader.Builder()
-                .forDatabase(prepareTestDatabase())
-                .withUser(TESTDB_USER_NAME);
+                .usingConfig(createTestConfigComplete())
+                .forAppliedQuery(createAppliedQuery());
         Assertions.assertDoesNotThrow(() -> builder.build());
     }
 
     @Test
-    void failsWithoutDatabase() {
+    void failsWithoutConfig() {
         JdbcDatabaseReader.Builder builder = new JdbcDatabaseReader.Builder()
-                .withUser(TESTDB_USER_NAME);
+                .forAppliedQuery(createAppliedQuery());
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));
-        Assertions.assertTrue(e.getMessage().contains("database not specified"));
+        Assertions.assertTrue(e.getMessage().contains("ablevert configuration not specified"));
     }
 
     @Test
-    void failsWithoutUserName() {
+    void failsWithoutAppliedQuery() {
         JdbcDatabaseReader.Builder builder = new JdbcDatabaseReader.Builder()
-                .forDatabase(prepareTestDatabase());
+                .usingConfig(createTestConfigComplete());
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));
-        Assertions.assertTrue(e.getMessage().contains("user not specified"));
+        Assertions.assertTrue(e.getMessage().contains("applied query not specified"));
     }
 
     @Test
-    void failsWithNonDatabaseUser() {
+    void failsForMissingDatabase() {
         JdbcDatabaseReader.Builder builder = new JdbcDatabaseReader.Builder()
-                .forDatabase(prepareTestDatabase())
-                .withUser(TESTDB_NOUSER_NAME);
+                .usingConfig(createTestConfigEmpty())
+                .forAppliedQuery(createAppliedQuery());
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));
-        Assertions.assertTrue(e.getMessage().contains("user"));
-        Assertions.assertTrue(e.getMessage().contains("not configured for database"));
+        Assertions.assertTrue(e.getMessage().contains("database not configured"));
     }
 
-    private Database prepareTestDatabase() {
+    @Test
+    void failsForMissingDatabaseQuery() {
+        JdbcDatabaseReader.Builder builder = new JdbcDatabaseReader.Builder()
+                .usingConfig(createTestConfigDatabaseOnly())
+                .forAppliedQuery(createAppliedQuery());
+        Exception e = Assertions.assertThrows(BuilderFailedException.class,
+                () -> builder.build());
+        Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));
+        Assertions.assertTrue(e.getMessage().contains("database not configured"));
+    }
+
+    private TablevertConfig createTestConfigComplete() {
+        try {
+            return new SimpleTablevertConfig.Builder()
+                    .withDatabase(createTestDatabase())
+                    .withQuery(createTestDatabaseQuery())
+                    .build();
+        } catch (BuilderFailedException e) {
+            throw new IllegalStateException("Builder should not fail in test");
+        }
+    }
+
+    private TablevertConfig createTestConfigDatabaseOnly() {
+        try {
+            return new SimpleTablevertConfig.Builder()
+                    .withDatabase(createTestDatabase())
+                    .build();
+        } catch (BuilderFailedException e) {
+            throw new IllegalStateException("Builder should not fail in test");
+        }
+    }
+
+    private TablevertConfig createTestConfigEmpty() {
+        try {
+            return new SimpleTablevertConfig.Builder()
+                    .build();
+        } catch (BuilderFailedException e) {
+            throw new IllegalStateException("Builder should not fail in test");
+        }
+    }
+
+    private Database createTestDatabase() {
         try {
             return new Database.Builder()
-                    .forDatabase("dummyDb")
+                    .forDatabase(TESTDB_NAME)
                     .onHost("localhost")
                     .ofType(DatabaseType.POSTGRESQL)
                     .withUser(new DatabaseUser(TESTDB_USER_NAME, "y"))
@@ -70,4 +113,30 @@ class JdbcDatabaseReaderBuilderTest {
             throw new IllegalStateException("Builder should not fail in test");
         }
     }
+
+    private DatabaseQuery createTestDatabaseQuery() {
+        try {
+            return new DatabaseQuery.Builder()
+                    .withName(TESTQUERY_NAME)
+                    .accessingDatabase(TESTDB_NAME)
+                    .selectingColumns(createQueryColumns())
+                    .selectingFrom("nothing")
+                    .build();
+        } catch (BuilderFailedException e) {
+            throw new IllegalStateException("Builder should not fail in test");
+        }
+    }
+
+    private List<DatabaseQueryColumn> createQueryColumns() {
+        List<DatabaseQueryColumn> columns = new ArrayList<>();
+        columns.add(new DatabaseQueryColumn("dummyCol"));
+        return columns;
+    }
+
+    private AppliedQuery createAppliedQuery() {
+        return new AppliedDatabaseQuery.Builder()
+                .forDatabaseQuery(TESTQUERY_NAME)
+                .build();
+    }
+
 }

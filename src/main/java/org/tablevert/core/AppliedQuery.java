@@ -17,11 +17,4 @@ public interface AppliedQuery {
      */
     String getBaseQueryName();
 
-    /**
-     * @return the name of the user to apply to this query
-     */
-    String getUserName();
-
-
-
 }

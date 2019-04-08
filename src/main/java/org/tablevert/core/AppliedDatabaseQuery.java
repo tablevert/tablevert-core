@@ -16,7 +16,6 @@ public class AppliedDatabaseQuery implements AppliedQuery {
      */
     public static class Builder {
         private String baseQueryName;
-        private String userName;
 
         /**
          * Sets the {@link org.tablevert.core.config.DatabaseQuery} reference.
@@ -30,17 +29,6 @@ public class AppliedDatabaseQuery implements AppliedQuery {
         }
 
         /**
-         * Sets the name of the database user to apply.
-         *
-         * @param userName the database user name
-         * @return the builder
-         */
-        public Builder withUser(String userName) {
-            this.userName = userName;
-            return this;
-        }
-
-        /**
          * Builds the {@link AppliedDatabaseQuery} object.
          *
          * @return the built object
@@ -49,13 +37,11 @@ public class AppliedDatabaseQuery implements AppliedQuery {
             // TODO: Add validation
             AppliedDatabaseQuery appliedQuery = new AppliedDatabaseQuery();
             appliedQuery.baseQueryName = this.baseQueryName;
-            appliedQuery.userName = this.userName;
             return appliedQuery;
         }
     }
 
     private String baseQueryName;
-    private String userName;
 
     private AppliedDatabaseQuery() {
     }
@@ -68,14 +54,6 @@ public class AppliedDatabaseQuery implements AppliedQuery {
     @Override
     public String getBaseQueryName() {
         return baseQueryName;
-    }
-
-    /**
-     * @return the name of the database user to apply to this query
-     */
-    @Override
-    public String getUserName() {
-        return userName;
     }
 
 }

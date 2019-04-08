@@ -115,6 +115,14 @@ public class Database implements Cloneable {
         return name;
     }
 
+    public String getDefaultUserName() {
+        // TODO: Add default user property or enhanced user selection logic!
+        if (userMap.isEmpty()) {
+            return null;
+        }
+        return userMap.get(userMap.keySet().stream().findFirst().get()).getName();
+    }
+
     public String getUserSecret(String userName) {
         if (!userMap.containsKey(userName)) {
             return null;

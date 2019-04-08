@@ -80,14 +80,14 @@ public class DatabaseQuery implements Cloneable {
          * @return the builder
          */
         public Builder withSorting(List<String> sorting) {
-            this.sorting = new ArrayList<>(sorting);
+            this.sorting = sorting == null ? null : new ArrayList<>(sorting);
             return this;
         }
 
         /**
          * Builds a {@link DatabaseQuery} object from the parameters passed to the builder.
          * @return the query object
-         * @throws BuilderFailedException
+         * @throws BuilderFailedException a builder-related exception
          */
         public DatabaseQuery build() throws BuilderFailedException {
             validate();
@@ -188,6 +188,14 @@ public class DatabaseQuery implements Cloneable {
      */
     public String getFromClause() {
         return this.fromClause;
+    }
+
+    /**
+     * Gets the {@code WHERE} clause of the query statement.
+     * @return the {@code WHERE} clause
+     */
+    public String getWhereClause() {
+        return this.whereClause;
     }
 
     /**

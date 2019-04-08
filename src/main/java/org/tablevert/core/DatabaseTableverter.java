@@ -41,7 +41,7 @@ public final class DatabaseTableverter implements Tableverter {
 
     private DataGrid retrieveDataFor(AppliedQuery appliedQuery) throws TablevertCoreException {
         DatabaseReader databaseReader = prepareReaderFor(appliedQuery);
-        return databaseReader.read(composeEffectiveQueryStatement(appliedQuery));
+        return databaseReader.read();
     }
 
     private Output generateOutput(DataGrid dataGrid, OutputFormat outputFormat) throws TablevertCoreException {
@@ -53,8 +53,8 @@ public final class DatabaseTableverter implements Tableverter {
         Database database = tablevertConfig.getDatabaseForQuery(appliedQuery.getBaseQueryName());
         DatabaseReader.Builder readerBuilder = selectReaderBuilderFor(database.getDbType());
         return readerBuilder
-                .forDatabase(database)
-                .withUser(appliedQuery.getUserName())
+                .usingConfig(tablevertConfig)
+                .forAppliedQuery(appliedQuery)
                 .build();
     }
 
@@ -75,30 +75,6 @@ public final class DatabaseTableverter implements Tableverter {
             default:
                 throw new IllegalArgumentException("No OutputGenerator defined for OutputFormat " + outputFormat);
         }
-    }
-
-    private String composeEffectiveQueryStatement(AppliedQuery appliedQuery) {
-        // TODO: Integrate applied filtering and sorting
-        DatabaseQuery databaseQuery = tablevertConfig.getDatabaseQuery(appliedQuery.getBaseQueryName());
-        DatabaseType databaseType = tablevertConfig.getDatabaseForQuery(databaseQuery.getName()).getDbType();
-
-        List<DatabaseQueryColumn> columnsToSelect = databaseQuery.getColumnsToSelect();
-
-        String queryStatement = String.format(databaseType.getSelectStatementTemplate(),
-                composeColumnsStringFor(columnsToSelect),
-                databaseQuery.getFromClause(),
-                "",
-                "");
-
-
-        return queryStatement;
-    }
-
-    private String composeColumnsStringFor(List<DatabaseQueryColumn> columnsToSelect) {
-        List<String> columns = new ArrayList<>();
-        columnsToSelect.forEach(column ->
-                columns.add((column.getFormula() == null ? "" : (column.getFormula() + " AS ")) + column.getName()));
-        return String.join(",", columns);
     }
 
 }

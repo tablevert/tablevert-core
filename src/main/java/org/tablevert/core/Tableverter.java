@@ -18,6 +18,7 @@ public interface Tableverter {
      * @param appliedQuery query with context-related filtering and sorting
      * @param outputFormat format expected for the tableversion's output
      * @return the converted table
+     * @throws TablevertCoreException exception related to Tablevert core functionality
      */
     Output tablevert(AppliedQuery appliedQuery, OutputFormat outputFormat) throws TablevertCoreException;
 

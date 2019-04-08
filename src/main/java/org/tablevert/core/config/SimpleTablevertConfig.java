@@ -90,6 +90,7 @@ public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
         /**
          * Creates a {@link SimpleTablevertConfig} object from the parameters passed to the builder.
          * @return the built configuration object
+         * @throws BuilderFailedException a builder-related exception
          */
         public SimpleTablevertConfig build()throws BuilderFailedException {
             validate();

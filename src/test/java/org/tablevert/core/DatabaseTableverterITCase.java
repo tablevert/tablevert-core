@@ -24,7 +24,7 @@ class DatabaseTableverterITCase {
     private static final String TESTQUERY_COLUMN_A_NAME = "description";
     private static final String TESTQUERY_COLUMN_B_NAME = "id";
     private static final String TESTQUERY_FROM = "mydummy";
-    private static final String TESTQUERY_WHERE = "id < 2";
+    private static final String TESTQUERY_WHERE = "id < 3";
 
     private static final String TESTUSER_NAME = "dummyreader";
 
@@ -35,7 +35,6 @@ class DatabaseTableverterITCase {
         Tableverter tableverter = factory.createDatabaseTableverterFor(getConfigForPostgresTest());
         AppliedDatabaseQuery appliedQuery = new AppliedDatabaseQuery.Builder()
                 .forDatabaseQuery(TESTQUERY_NAME)
-                .withUser(TESTUSER_NAME)
                 .build();
         Output output = tableverter.tablevert(appliedQuery, OutputFormat.XLSX);
         Assertions.assertNotNull(output);

@@ -5,7 +5,7 @@
 
 package org.tablevert.core;
 
-import org.tablevert.core.config.Database;
+import org.tablevert.core.config.*;
 
 import java.sql.*;
 import java.util.*;
@@ -20,31 +20,43 @@ class JdbcDatabaseReader implements DatabaseReader {
 
         private JdbcDatabaseReader dbReader;
         private Database database;
-        private String userName;
+        private DatabaseQuery databaseQuery;
+        private AppliedQuery appliedQuery;
+        private TablevertConfig tablevertConfig;
         private Integer port;
 
         @Override
-        public Builder forDatabase(Database database) {
-            this.database = database;
+        public Builder usingConfig(TablevertConfig tablevertConfig) {
+            this.tablevertConfig = tablevertConfig;
             return this;
         }
 
         @Override
-        public Builder withUser(String userName) {
-            this.userName = userName;
+        public Builder forAppliedQuery(AppliedQuery appliedQuery) {
+            this.appliedQuery = appliedQuery;
             return this;
         }
 
         @Override
         public JdbcDatabaseReader build() throws BuilderFailedException {
-            if (port == null) {
-                port = selectDefaultPort();
-            }
+            initDatabaseAndQuery();
+            checkInitPort();
             validate();
             dbReader = new JdbcDatabaseReader();
-            dbReader.setConnectionString(assembleConnectionString());
-            dbReader.setCredentials(userName, database.getUserSecret(userName));
+            dbReader.databaseType = database.getDbType();
+            dbReader.connectionString = assembleConnectionString();
+            dbReader.databaseQuery = databaseQuery;
+            dbReader.appliedQuery = appliedQuery;
+            dbReader.userName = database.getDefaultUserName();
+            dbReader.userSecret = database.getUserSecret(dbReader.userName);
             return dbReader;
+        }
+
+        private void initDatabaseAndQuery() {
+            if (tablevertConfig != null && appliedQuery != null) {
+                this.database = tablevertConfig.getDatabaseForQuery(appliedQuery.getBaseQueryName());
+                this.databaseQuery = tablevertConfig.getDatabaseQuery(appliedQuery.getBaseQueryName());
+            }
         }
 
         private String assembleConnectionString() {
@@ -57,34 +69,45 @@ class JdbcDatabaseReader implements DatabaseReader {
 
         private void validate() throws BuilderFailedException {
             String errors = "";
+            if (tablevertConfig == null) {
+                errors += " - Tablevert configuration not specified;";
+            }
+            if (appliedQuery == null) {
+                errors += " - applied query not specified;";
+            }
             if (database == null) {
-                errors += "- database not specified";
+                errors += " - database not configured or not specified;";
             } else {
                 try {
                     Class.forName(selectJdbcDriverClassName());
                 } catch (ClassNotFoundException e) {
-                    errors += "- driver class is missing for database type [" + database.getDbType().getName() + "]";
+                    errors += " - driver class is missing for database type [" + database.getDbType().getName() + "];";
                 }
             }
+            if (databaseQuery == null) {
+                errors += " - base query for applied query not configured;";
+            }
+            String userName = database == null ? null : database.getDefaultUserName();
             if (userName == null || userName.isEmpty()) {
-                errors += "- user not specified";
+                errors += " - user not specified;";
             }
             else if (database != null && database.getUserSecret(userName) == null) {
-                errors += "- user [" + userName + "] not configured for database ["
-                        + (database.getName() == null ? "??" : database.getName()) + "]";
+                errors += " - user [" + userName + "] not configured for database ["
+                        + (database.getName() == null ? "??" : database.getName()) + "];";
             }
             if (!errors.isEmpty()) {
                 throw new BuilderFailedException("Builder validation failed with errors: " + errors);
             }
         }
 
-        private Integer selectDefaultPort() throws BuilderFailedException {
-            if (database == null) {
-                return null;
+        private void checkInitPort() throws BuilderFailedException {
+            if (port != null || database == null) {
+                return;
             }
             switch (database.getDbType()) {
                 case POSTGRESQL:
-                    return DEFAULT_PORT_POSTGRESQL;
+                    port = DEFAULT_PORT_POSTGRESQL;
+                    return;
                 default:
                     throw new BuilderFailedException("No default port available for database type ["
                             + database.getDbType().name() + "]");
@@ -102,18 +125,21 @@ class JdbcDatabaseReader implements DatabaseReader {
         }
     }
 
+    private DatabaseType databaseType;
     private String connectionString;
     private String userName;
     private String userSecret;
+    private DatabaseQuery databaseQuery;
+    private AppliedQuery appliedQuery;
 
     private JdbcDatabaseReader() {
     }
 
     @Override
-    public DataGrid read(String queryStatement) throws TablevertCoreException {
+    public DataGrid read() throws TablevertCoreException {
         try (Connection connection = openConnection()) {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(queryStatement);
+            ResultSet resultSet = statement.executeQuery(composeQueryStatement());
 
             ResultSetMetaData metaData = resultSet.getMetaData();
 
@@ -126,6 +152,38 @@ class JdbcDatabaseReader implements DatabaseReader {
             throw new DatabaseReaderException(e);
         }
     }
+
+    private String composeQueryStatement() {
+        // TODO: Integrate applied filtering and sorting
+        List<DatabaseQueryColumn> columnsToSelect = databaseQuery.getColumnsToSelect();
+
+        String queryStatement = String.format(databaseType.getSelectStatementTemplate(),
+                prepareColumns(columnsToSelect),
+                prepareSource(databaseQuery.getFromClause()),
+                prepareFilter(databaseQuery.getWhereClause()),
+                "");
+
+        return queryStatement;
+    }
+
+    private String prepareColumns(List<DatabaseQueryColumn> columnsToSelect) {
+        List<String> columns = new ArrayList<>();
+        columnsToSelect.forEach(column ->
+                columns.add((column.getFormula() == null ? "" : (column.getFormula() + " AS ")) + column.getName()));
+        return String.join(",", columns);
+    }
+
+    private String prepareSource(String from) {
+        return from;
+    }
+
+    private String prepareFilter(String baseClause) {
+        if (baseClause == null || baseClause.trim().isEmpty()) {
+            return "";
+        }
+        return " WHERE " + baseClause;
+    }
+
 
     private int extractColumns(DataGrid dataGrid, ResultSetMetaData metaData) throws SQLException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
@@ -172,15 +230,6 @@ class JdbcDatabaseReader implements DatabaseReader {
                 .forEach(col -> conversionTypes.add(col.getJavaClassName().startsWith("java")
                         ? JdbcValueConversionType.OBJECT : JdbcValueConversionType.STRING));
         return conversionTypes;
-    }
-
-    private void setConnectionString(String connectionString) {
-        this.connectionString = connectionString;
-    }
-
-    private void setCredentials(String userName, String userSecret) {
-        this.userName = userName;
-        this.userSecret = userSecret;
     }
 
     private Connection openConnection() throws DatabaseReaderException {
