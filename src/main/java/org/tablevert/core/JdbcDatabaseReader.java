@@ -5,6 +5,8 @@
 
 package org.tablevert.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tablevert.core.config.*;
 
 import java.sql.*;
@@ -125,6 +127,8 @@ class JdbcDatabaseReader implements DatabaseReader {
         }
     }
 
+    private final Logger logger = LoggerFactory.getLogger(JdbcDatabaseReader.class);
+
     private DatabaseType databaseType;
     private String connectionString;
     private String userName;
@@ -161,8 +165,9 @@ class JdbcDatabaseReader implements DatabaseReader {
                 prepareColumns(columnsToSelect),
                 prepareSource(databaseQuery.getFromClause()),
                 prepareFilter(databaseQuery.getWhereClause()),
-                "");
+                prepareSorting(databaseQuery.getSorting()));
 
+        logger.debug("Prepared query statement: " + queryStatement);
         return queryStatement;
     }
 
@@ -182,6 +187,31 @@ class JdbcDatabaseReader implements DatabaseReader {
             return "";
         }
         return " WHERE " + baseClause;
+    }
+
+    private String prepareSorting(List<String> sortColumns) {
+        if (sortColumns == null || sortColumns.isEmpty()) {
+            return "";
+        }
+        String sorting = "";
+        for (String column : sortColumns) {
+            String sortedColumn = checkAddSortDirection(column);
+            sorting += ((!sortedColumn.isEmpty() && !sorting.isEmpty()) ? "," : "") + sortedColumn;
+        }
+        if (sorting.isEmpty()) {
+            return "";
+        }
+        return " ORDER BY " + sorting;
+    }
+
+    private String checkAddSortDirection(String column) {
+        if (column == null) {
+            return "";
+        }
+        if (column.startsWith("-")) {
+            return column.substring(1) + " DESC";
+        }
+        return column;
     }
 
 

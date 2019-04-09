@@ -73,7 +73,6 @@ class DatabaseTableverterITCase {
 
     private List<String> createValidSorting() {
         List<String> sorting = new ArrayList<>();
-        sorting.add(TESTQUERY_COLUMN_B_NAME);
         sorting.add("-" + TESTQUERY_COLUMN_A_NAME);
         return sorting;
     }

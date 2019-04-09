@@ -199,6 +199,18 @@ public class DatabaseQuery implements Cloneable {
     }
 
     /**
+     * Gets a clone of the sort columns.
+     * If a column name is prefixed with a minus character ('-'), it will be ordered descendingly.
+     * @return the sort columns
+     */
+    public List<String> getSorting() {
+        if (sorting == null) {
+            return null;
+        }
+        return new ArrayList<>(sorting);
+    }
+
+    /**
      * Creates a deep clone of the object.
      * @return the clone
      */
