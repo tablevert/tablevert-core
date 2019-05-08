@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Query for retrieving data from a database.
+ * Pre-configured query for retrieving data from a database.
  */
-public class DatabaseQuery implements Cloneable {
+public class PredefinedDatabaseQuery implements PredefinedQuery, Cloneable {
 
     public static class Builder {
         private String name;
@@ -85,13 +85,13 @@ public class DatabaseQuery implements Cloneable {
         }
 
         /**
-         * Builds a {@link DatabaseQuery} object from the parameters passed to the builder.
+         * Builds a {@link PredefinedDatabaseQuery} object from the parameters passed to the builder.
          * @return the query object
          * @throws BuilderFailedException a builder-related exception
          */
-        public DatabaseQuery build() throws BuilderFailedException {
+        public PredefinedDatabaseQuery build() throws BuilderFailedException {
             validate();
-            DatabaseQuery query = new DatabaseQuery();
+            PredefinedDatabaseQuery query = new PredefinedDatabaseQuery();
             query.name = this.name;
             query.databaseName = this.databaseName;
             query.columnsToSelect = this.columnsToSelect;
@@ -155,7 +155,7 @@ public class DatabaseQuery implements Cloneable {
     private String whereClause;
     private List<String> sorting;
 
-    private DatabaseQuery() {
+    private PredefinedDatabaseQuery() {
     }
 
     /**
@@ -169,6 +169,14 @@ public class DatabaseQuery implements Cloneable {
      * @return the name of the database to access
      */
     public String getDatabaseName() {
+        return databaseName;
+    }
+
+    /**
+     * @return the name of the database to access
+     */
+    @Override
+    public String getDataSourceName() {
         return databaseName;
     }
 
@@ -215,7 +223,7 @@ public class DatabaseQuery implements Cloneable {
      * @return the clone
      */
     @Override
-    public DatabaseQuery clone() {
+    public PredefinedDatabaseQuery clone() {
         try {
             return new Builder()
                     .withName(this.name)

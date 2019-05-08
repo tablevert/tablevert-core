@@ -7,14 +7,12 @@ package org.tablevert.core.config;
 
 /**
  * Tablevert configuration to be passed to the Tableverter instance.
- *
- * @author doc-hil
- */
+  */
 public interface TablevertConfig {
 
-    DatabaseQuery getDatabaseQuery(String queryName);
+    PredefinedQuery getPredefinedQuery(String queryName);
 
-    Database getDatabaseForQuery(String queryName);
+    DataSource getDataSourceForQuery(String queryName);
 
     TablevertConfig clone();
 

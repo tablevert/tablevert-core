@@ -24,7 +24,7 @@ class DatabaseBuilderTest {
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
                 .onHost(TESTDB_HOST)
-                .withUser(new DatabaseUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
+                .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Assertions.assertDoesNotThrow(() -> builder.build());
     }
 
@@ -33,7 +33,7 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .ofType(DatabaseType.POSTGRESQL)
                 .onHost(TESTDB_HOST)
-                .withUser(new DatabaseUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
+                .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));
@@ -45,7 +45,7 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .forDatabase(TESTDB_NAME)
                 .onHost(TESTDB_HOST)
-                .withUser(new DatabaseUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
+                .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));
@@ -57,7 +57,7 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
-                .withUser(new DatabaseUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
+                .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));

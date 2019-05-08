@@ -7,7 +7,6 @@ package org.tablevert.core.config;
 
 import org.tablevert.core.BuilderFailedException;
 
-import javax.xml.crypto.Data;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -22,65 +21,63 @@ public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
      */
     public static class Builder {
 
-        private Map<String, Database> databaseMap;
-        private final Map<String, DatabaseQuery> queryMap;
-        private Map<String, DatabaseUser> userMap;
+        private Map<String, DataSource> dataSourceMap;
+        private final Map<String, PredefinedQuery> queryMap;
 
         /**
          * Instantiates the builder.
          */
         public Builder() {
             this.queryMap = new Hashtable<>();
-            this.databaseMap = new Hashtable<>();
-            this.userMap = new Hashtable<>();
+            this.dataSourceMap = new Hashtable<>();
         }
 
         /**
-         * Adds a {@link Database} instance to the builder.
+         * Adds a {@link DataSource} instance to the builder.
          * If a database with the same name already exists, it is replaced.
-         * @param database the database to add
+         * @param dataSource the database to add
          * @return the builder
          */
-        public Builder withDatabase(Database database) {
-            putOrReplace(databaseMap, database.getName(), database);
+        public Builder withDataSource(DataSource dataSource) {
+            putOrReplace(dataSourceMap, dataSource.getName(), dataSource);
             return this;
         }
 
         /**
-         * Adds multiple {@link Database} instances to the builder.
-         * Calls {@code withDatabase} for each database.
-         * @param databases the databases to add
+         * Adds multiple {@link DataSource} instances to the builder.
+         * Calls {@code withDataSource} for each database.
+         * @param dataSources the data sources to add
          * @return the builder
          */
-        public Builder withDatabases(List<Database> databases) {
-            if (databases != null) {
-                for (Database database : databases) {
-                    withDatabase(database);
+        public Builder withDataSources(List<Database> dataSources) {
+            if (dataSources != null) {
+                for (Database database : dataSources) {
+                    withDataSource(database);
                 }
             }
             return this;
         }
 
         /**
-         * Adds a {@link DatabaseQuery} instance to the builder.
+         * Adds a {@link PredefinedQuery} instance to the builder.
          * If a query with the same name already exists, it is replaced.
          * @param query the query to add
          * @return the builder
          */
-        public Builder withQuery(DatabaseQuery query) {
+        public Builder withQuery(PredefinedQuery query) {
             putOrReplace(queryMap, query.getName(), query);
             return this;
         }
 
         /**
-         * Adds multiple {@link DatabaseQuery} instances to the builder.
+         * Adds multiple {@link PredefinedQuery} instances to the builder.
          * Calls {@code withQuery} for each query.
          * @param queries the queries to add
          * @return the builder
          */
-        public Builder withQueries(List<DatabaseQuery> queries) {
+        public Builder withQueries(List<PredefinedQuery> queries) {
             if (queries != null) {
-                for (DatabaseQuery query : queries) {
+                for (PredefinedQuery query : queries) {
                     withQuery(query);
                 }
             }
@@ -96,7 +93,7 @@ public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
             validate();
             SimpleTablevertConfig config = new SimpleTablevertConfig();
             config.queryMap = this.queryMap;
-            config.databaseMap = this.databaseMap;
+            config.dataSourceMap = this.dataSourceMap;
             return config;
         }
 
@@ -112,19 +109,19 @@ public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
 
         private String detectQueryMapErrors() {
             String errors = "";
-            for (Map.Entry<String, DatabaseQuery> mapEntry : queryMap.entrySet()) {
+            for (Map.Entry<String, PredefinedQuery> mapEntry : queryMap.entrySet()) {
                 errors += detectQueryErrors(mapEntry.getValue());
             }
             return errors;
         }
 
-        private String detectQueryErrors(DatabaseQuery query) {
+        private String detectQueryErrors(PredefinedQuery query) {
             if (query == null) {
                 return  "Query is not defined; ";
             }
             String errors = "";
-            if (databaseMap.get(query.getDatabaseName()) == null) {
-                errors += "Database [" + query.getDatabaseName() + "] associated with query ["
+            if (dataSourceMap.get(query.getDataSourceName()) == null) {
+                errors += "Database [" + query.getDataSourceName() + "] associated with query ["
                         + query.getName() + "] is not configured; ";
             }
             return errors;
@@ -139,21 +136,31 @@ public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
         }
     }
 
-    private Map<String, Database> databaseMap;
-    private Map<String, DatabaseQuery> queryMap;
+    private Map<String, DataSource> dataSourceMap;
+    private Map<String, PredefinedQuery> queryMap;
 
     private SimpleTablevertConfig() {
     }
 
-    public DatabaseQuery getDatabaseQuery(String queryName) {
-        DatabaseQuery databaseQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
-        return databaseQuery == null ? null : databaseQuery.clone();
+    /**
+     * Gets the pre-defined query with the provided name
+     * @param queryName the name of the query
+     * @return the query
+     */
+    public PredefinedQuery getPredefinedQuery(String queryName) {
+        PredefinedQuery predefinedQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
+        return predefinedQuery == null ? null : predefinedQuery.clone();
     }
 
-    public Database getDatabaseForQuery(String queryName) {
-        DatabaseQuery databaseQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
-        return (databaseQuery == null || !databaseMap.containsKey(databaseQuery.getDatabaseName()))
-                ? null : databaseMap.get(databaseQuery.getDatabaseName()).clone();
+    /**
+     * Gets the data source referenced by the query having the provided name.
+     * @param queryName the name of the query
+     * @return the data source
+     */
+    public DataSource getDataSourceForQuery(String queryName) {
+        PredefinedQuery predefinedDatabaseQuery = queryMap.containsKey(queryName) ? queryMap.get(queryName) : null;
+        return (predefinedDatabaseQuery == null || !dataSourceMap.containsKey(predefinedDatabaseQuery.getDataSourceName()))
+                ? null : dataSourceMap.get(predefinedDatabaseQuery.getDataSourceName()).clone();
     }
 
     /**
@@ -165,8 +172,8 @@ public class SimpleTablevertConfig implements TablevertConfig, Cloneable {
         SimpleTablevertConfig config = new SimpleTablevertConfig();
         config.queryMap = new Hashtable<>();
         this.queryMap.forEach((key, value) -> config.queryMap.put(key, value.clone()));
-        config.databaseMap = new Hashtable<>();
-        this.databaseMap.forEach((key, value) -> config.databaseMap.put(key, value.clone()));
+        config.dataSourceMap = new Hashtable<>();
+        this.dataSourceMap.forEach((key, value) -> config.dataSourceMap.put(key, value.clone()));
         return config;
     }
 

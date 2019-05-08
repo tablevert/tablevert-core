@@ -14,13 +14,13 @@ import java.util.Map;
 /**
  * A database containing tablevert source data.
  */
-public class Database implements Cloneable {
+public class Database implements DataSource, Cloneable {
 
     public static class Builder {
         private DatabaseType dbType;
         private String name;
         private String host;
-        private Map<String, DatabaseUser> userMap;
+        private Map<String, BackendUser> userMap;
 
         public Builder() {
             this.userMap = new Hashtable<>();
@@ -41,7 +41,7 @@ public class Database implements Cloneable {
             return this;
         }
 
-        public Builder withUser(DatabaseUser user) {
+        public Builder withUser(BackendUser user) {
             String key = user.getName();
             if (this.userMap.containsKey(key)) {
                 this.userMap.replace(key, user);
@@ -51,9 +51,9 @@ public class Database implements Cloneable {
             return this;
         }
 
-        public Builder withUsers(List<DatabaseUser> users) {
+        public Builder withUsers(List<BackendUser> users) {
             if (users != null) {
-                for (DatabaseUser user : users) {
+                for (BackendUser user : users) {
                     withUser(user);
                 }
             }
@@ -94,7 +94,7 @@ public class Database implements Cloneable {
     private DatabaseType dbType;
     private String name;
     private String host;
-    private Map<String, DatabaseUser> userMap;
+    private Map<String, BackendUser> userMap;
 
     private Database() {
     }

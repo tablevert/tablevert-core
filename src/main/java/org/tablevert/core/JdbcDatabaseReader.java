@@ -22,7 +22,7 @@ class JdbcDatabaseReader implements DatabaseReader {
 
         private JdbcDatabaseReader dbReader;
         private Database database;
-        private DatabaseQuery databaseQuery;
+        private PredefinedDatabaseQuery predefinedDatabaseQuery;
         private AppliedQuery appliedQuery;
         private TablevertConfig tablevertConfig;
         private Integer port;
@@ -47,17 +47,27 @@ class JdbcDatabaseReader implements DatabaseReader {
             dbReader = new JdbcDatabaseReader();
             dbReader.databaseType = database.getDbType();
             dbReader.connectionString = assembleConnectionString();
-            dbReader.databaseQuery = databaseQuery;
+            dbReader.predefinedDatabaseQuery = predefinedDatabaseQuery;
             dbReader.appliedQuery = appliedQuery;
             dbReader.userName = database.getDefaultUserName();
             dbReader.userSecret = database.getUserSecret(dbReader.userName);
             return dbReader;
         }
 
-        private void initDatabaseAndQuery() {
+        private void initDatabaseAndQuery() throws BuilderFailedException {
             if (tablevertConfig != null && appliedQuery != null) {
-                this.database = tablevertConfig.getDatabaseForQuery(appliedQuery.getBaseQueryName());
-                this.databaseQuery = tablevertConfig.getDatabaseQuery(appliedQuery.getBaseQueryName());
+                DataSource dataSource = tablevertConfig.getDataSourceForQuery(appliedQuery.getBaseQueryName());
+                if (dataSource != null && !Database.class.equals(dataSource.getClass())) {
+                    throw new BuilderFailedException(
+                            "Data source is not a database; actual class: [" + dataSource.getClass().getSimpleName() + "]");
+                }
+                this.database = (Database) dataSource;
+                PredefinedQuery predefinedQuery = tablevertConfig.getPredefinedQuery(appliedQuery.getBaseQueryName());
+                if (predefinedQuery != null && !PredefinedDatabaseQuery.class.equals(predefinedQuery.getClass())) {
+                    throw new BuilderFailedException(
+                            "Predefined query does not a database query; actual class: [" + predefinedQuery.getClass().getSimpleName() + "]");
+                }
+                this.predefinedDatabaseQuery = (PredefinedDatabaseQuery) predefinedQuery;
             }
         }
 
@@ -86,14 +96,13 @@ class JdbcDatabaseReader implements DatabaseReader {
                     errors += " - driver class is missing for database type [" + database.getDbType().getName() + "];";
                 }
             }
-            if (databaseQuery == null) {
+            if (predefinedDatabaseQuery == null) {
                 errors += " - base query for applied query not configured;";
             }
             String userName = database == null ? null : database.getDefaultUserName();
             if (userName == null || userName.isEmpty()) {
                 errors += " - user not specified;";
-            }
-            else if (database != null && database.getUserSecret(userName) == null) {
+            } else if (database != null && database.getUserSecret(userName) == null) {
                 errors += " - user [" + userName + "] not configured for database ["
                         + (database.getName() == null ? "??" : database.getName()) + "];";
             }
@@ -133,7 +142,7 @@ class JdbcDatabaseReader implements DatabaseReader {
     private String connectionString;
     private String userName;
     private String userSecret;
-    private DatabaseQuery databaseQuery;
+    private PredefinedDatabaseQuery predefinedDatabaseQuery;
     private AppliedQuery appliedQuery;
 
     private JdbcDatabaseReader() {
@@ -159,13 +168,13 @@ class JdbcDatabaseReader implements DatabaseReader {
 
     private String composeQueryStatement() {
         // TODO: Integrate applied filtering and sorting
-        List<DatabaseQueryColumn> columnsToSelect = databaseQuery.getColumnsToSelect();
+        List<DatabaseQueryColumn> columnsToSelect = predefinedDatabaseQuery.getColumnsToSelect();
 
         String queryStatement = String.format(databaseType.getSelectStatementTemplate(),
                 prepareColumns(columnsToSelect),
-                prepareSource(databaseQuery.getFromClause()),
-                prepareFilter(databaseQuery.getWhereClause()),
-                prepareSorting(databaseQuery.getSorting()));
+                prepareSource(predefinedDatabaseQuery.getFromClause()),
+                prepareFilter(predefinedDatabaseQuery.getWhereClause()),
+                prepareSorting(predefinedDatabaseQuery.getSorting()));
 
         logger.debug("Prepared query statement: " + queryStatement);
         return queryStatement;

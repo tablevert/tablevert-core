@@ -38,7 +38,7 @@ public class JdbcDatabaseReaderITCase {
 
     private TablevertConfig createTestConfig() throws Exception {
         return new SimpleTablevertConfig.Builder()
-                .withDatabase(createTestDatabase())
+                .withDataSource(createTestDatabase())
                 .withQuery(createTestDatabaseQuery())
                 .build();
     }
@@ -48,12 +48,12 @@ public class JdbcDatabaseReaderITCase {
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
                 .onHost(TESTDB_HOST)
-                .withUser(new DatabaseUser(TESTDB_USER_NAME, "teest"))
+                .withUser(new BackendUser(TESTDB_USER_NAME, "teest"))
                 .build();
     }
 
-    private DatabaseQuery createTestDatabaseQuery() throws Exception {
-        return new DatabaseQuery.Builder()
+    private PredefinedDatabaseQuery createTestDatabaseQuery() throws Exception {
+        return new PredefinedDatabaseQuery.Builder()
                 .withName(TESTQUERY_NAME)
                 .accessingDatabase(TESTDB_NAME)
                 .selectingColumns(createQueryColumns())

@@ -5,8 +5,10 @@
 
 package org.tablevert.core;
 
+import org.tablevert.core.config.PredefinedDatabaseQuery;
+
 /**
- * A database query, where the underlying {@link org.tablevert.core.config.DatabaseQuery} instance is extended with
+ * A database query, where the underlying {@link PredefinedDatabaseQuery} instance is extended with
  * context-specific filtering and sorting.
  */
 public class AppliedDatabaseQuery implements AppliedQuery {
@@ -18,7 +20,7 @@ public class AppliedDatabaseQuery implements AppliedQuery {
         private String baseQueryName;
 
         /**
-         * Sets the {@link org.tablevert.core.config.DatabaseQuery} reference.
+         * Sets the {@link PredefinedDatabaseQuery} reference.
          *
          * @param baseQueryName the name of the underlying base query
          * @return the builder
@@ -47,7 +49,7 @@ public class AppliedDatabaseQuery implements AppliedQuery {
     }
 
     /**
-     * Gets the name of the underlying {@link org.tablevert.core.config.DatabaseQuery} object.
+     * Gets the name of the underlying {@link PredefinedDatabaseQuery} object.
      *
      * @return the base query name
      */

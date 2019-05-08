@@ -6,14 +6,14 @@
 package org.tablevert.core.config;
 
 /**
- * A basic-auth user for database access.
+ * A basic-auth user for data source access.
  */
-public final class DatabaseUser implements Cloneable {
+public final class BackendUser implements Cloneable {
 
     private String name;
     private String secret;
 
-    public DatabaseUser(String name, String secret) {
+    public BackendUser(String name, String secret) {
         this.name = name;
         this.secret = secret;
     }
@@ -30,7 +30,7 @@ public final class DatabaseUser implements Cloneable {
         return secret;
     }
 
-    public DatabaseUser clone() {
-        return new DatabaseUser(name, secret);
+    public BackendUser clone() {
+        return new BackendUser(name, secret);
     }
 }

@@ -12,7 +12,7 @@ import org.tablevert.core.BuilderFailedException;
 import java.util.ArrayList;
 import java.util.List;
 
-class DatabaseQueryBuilderTest {
+class PredefinedDatabaseQueryBuilderTest {
 
     private static final String QUERY_NAME = "testQuery";
     private static final String QUERY_COLUMN_A_FORMULA = "LEFT(dummycol, 4)";
@@ -27,7 +27,7 @@ class DatabaseQueryBuilderTest {
 
     @Test
     void succeedsForValidData() {
-        DatabaseQuery.Builder builder = new DatabaseQuery.Builder()
+        PredefinedDatabaseQuery.Builder builder = new PredefinedDatabaseQuery.Builder()
                 .withName(QUERY_NAME)
                 .accessingDatabase(TESTDB_NAME)
                 .selectingColumns(createValidColumns())
@@ -39,7 +39,7 @@ class DatabaseQueryBuilderTest {
 
     @Test
     void failsOnMissingName() {
-        DatabaseQuery.Builder builder = new DatabaseQuery.Builder()
+        PredefinedDatabaseQuery.Builder builder = new PredefinedDatabaseQuery.Builder()
                 .accessingDatabase(TESTDB_NAME)
                 .selectingColumns(createValidColumns())
                 .selectingFrom(QUERY_FROM)
@@ -53,7 +53,7 @@ class DatabaseQueryBuilderTest {
 
     @Test
     void failsOnMissingDatabaseName() {
-        DatabaseQuery.Builder builder = new DatabaseQuery.Builder()
+        PredefinedDatabaseQuery.Builder builder = new PredefinedDatabaseQuery.Builder()
                 .withName(QUERY_NAME)
                 .selectingColumns(createValidColumns())
                 .selectingFrom(QUERY_FROM)
@@ -67,7 +67,7 @@ class DatabaseQueryBuilderTest {
 
     @Test
     void failsOnMissingFromClause() {
-        DatabaseQuery.Builder builder = new DatabaseQuery.Builder()
+        PredefinedDatabaseQuery.Builder builder = new PredefinedDatabaseQuery.Builder()
                 .withName(QUERY_NAME)
                 .accessingDatabase(TESTDB_NAME)
                 .selectingColumns(createValidColumns())
@@ -81,7 +81,7 @@ class DatabaseQueryBuilderTest {
 
     @Test
     void failsOnMissingColumns() {
-        DatabaseQuery.Builder builder = new DatabaseQuery.Builder()
+        PredefinedDatabaseQuery.Builder builder = new PredefinedDatabaseQuery.Builder()
                 .withName(QUERY_NAME)
                 .accessingDatabase(TESTDB_NAME)
                 .applyingFilter(QUERY_WHERE)

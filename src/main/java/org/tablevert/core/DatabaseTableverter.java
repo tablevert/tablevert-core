@@ -9,9 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tablevert.core.config.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Implementation of the {@link org.tablevert.core.Tableverter} interface for database sources.
  */
@@ -50,8 +47,12 @@ public final class DatabaseTableverter implements Tableverter {
     }
 
     private DatabaseReader prepareReaderFor(AppliedQuery appliedQuery) throws BuilderFailedException {
-        Database database = tablevertConfig.getDatabaseForQuery(appliedQuery.getBaseQueryName());
-        DatabaseReader.Builder readerBuilder = selectReaderBuilderFor(database.getDbType());
+        DataSource database = tablevertConfig.getDataSourceForQuery(appliedQuery.getBaseQueryName());
+        if (!Database.class.equals(database.getClass())) {
+            throw new BuilderFailedException("Data source is not a Database object; actual class name is ["
+                    + database.getClass().getSimpleName() + "]");
+        }
+        DatabaseReader.Builder readerBuilder = selectReaderBuilderFor(((Database)database).getDbType());
         return readerBuilder
                 .usingConfig(tablevertConfig)
                 .forAppliedQuery(appliedQuery)

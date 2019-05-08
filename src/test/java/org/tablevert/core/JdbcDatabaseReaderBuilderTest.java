@@ -74,7 +74,7 @@ class JdbcDatabaseReaderBuilderTest {
     private TablevertConfig createTestConfigComplete() {
         try {
             return new SimpleTablevertConfig.Builder()
-                    .withDatabase(createTestDatabase())
+                    .withDataSource(createTestDatabase())
                     .withQuery(createTestDatabaseQuery())
                     .build();
         } catch (BuilderFailedException e) {
@@ -85,7 +85,7 @@ class JdbcDatabaseReaderBuilderTest {
     private TablevertConfig createTestConfigDatabaseOnly() {
         try {
             return new SimpleTablevertConfig.Builder()
-                    .withDatabase(createTestDatabase())
+                    .withDataSource(createTestDatabase())
                     .build();
         } catch (BuilderFailedException e) {
             throw new IllegalStateException("Builder should not fail in test");
@@ -107,16 +107,16 @@ class JdbcDatabaseReaderBuilderTest {
                     .forDatabase(TESTDB_NAME)
                     .onHost("localhost")
                     .ofType(DatabaseType.POSTGRESQL)
-                    .withUser(new DatabaseUser(TESTDB_USER_NAME, "y"))
+                    .withUser(new BackendUser(TESTDB_USER_NAME, "y"))
                     .build();
         } catch (BuilderFailedException e) {
             throw new IllegalStateException("Builder should not fail in test");
         }
     }
 
-    private DatabaseQuery createTestDatabaseQuery() {
+    private PredefinedDatabaseQuery createTestDatabaseQuery() {
         try {
-            return new DatabaseQuery.Builder()
+            return new PredefinedDatabaseQuery.Builder()
                     .withName(TESTQUERY_NAME)
                     .accessingDatabase(TESTDB_NAME)
                     .selectingColumns(createQueryColumns())

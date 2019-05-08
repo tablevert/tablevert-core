@@ -46,13 +46,13 @@ class DatabaseTableverterITCase {
 
     private TablevertConfig getConfigForPostgresTest() throws Exception {
         TablevertConfig config = new SimpleTablevertConfig.Builder()
-                .withDatabase(new Database.Builder()
+                .withDataSource(new Database.Builder()
                         .forDatabase(TESTDB_NAME)
                         .ofType(DatabaseType.POSTGRESQL)
                         .onHost(TESTDB_HOST)
-                        .withUser(new DatabaseUser(TESTUSER_NAME, "test"))
+                        .withUser(new BackendUser(TESTUSER_NAME, "test"))
                         .build())
-                .withQuery(new DatabaseQuery.Builder()
+                .withQuery(new PredefinedDatabaseQuery.Builder()
                         .withName(TESTQUERY_NAME)
                         .accessingDatabase(TESTDB_NAME)
                         .selectingColumns(createValidColumns())
