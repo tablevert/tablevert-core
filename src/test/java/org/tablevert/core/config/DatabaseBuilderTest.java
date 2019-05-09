@@ -13,6 +13,7 @@ class DatabaseBuilderTest {
 
     private static final String TESTDB_NAME = "dummy";
     private static final String TESTDB_HOST = "localhost";
+    private static final Integer TESTDB_PORT = 4711;
     private static final String TESTDB_USER_NAME = "tester";
     private static final String TESTDB_USER_SECRET = "test";
 
@@ -20,6 +21,17 @@ class DatabaseBuilderTest {
 
     @Test
     void succeedsForValidData() {
+        Database.Builder builder = new Database.Builder()
+                .forDatabase(TESTDB_NAME)
+                .ofType(DatabaseType.POSTGRESQL)
+                .onHost(TESTDB_HOST)
+                .withPort(TESTDB_PORT)
+                .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
+        Assertions.assertDoesNotThrow(() -> builder.build());
+    }
+
+    @Test
+    void succeedsForMissingPort() {
         Database.Builder builder = new Database.Builder()
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
@@ -33,6 +45,7 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .ofType(DatabaseType.POSTGRESQL)
                 .onHost(TESTDB_HOST)
+                .withPort(TESTDB_PORT)
                 .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
@@ -45,6 +58,7 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .forDatabase(TESTDB_NAME)
                 .onHost(TESTDB_HOST)
+                .withPort(TESTDB_PORT)
                 .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
@@ -57,6 +71,7 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
+                .withPort(TESTDB_PORT)
                 .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_SECRET));
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
@@ -69,7 +84,8 @@ class DatabaseBuilderTest {
         Database.Builder builder = new Database.Builder()
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
-                .onHost(TESTDB_HOST);
+                .onHost(TESTDB_HOST)
+                .withPort(TESTDB_PORT);
         Exception e = Assertions.assertThrows(BuilderFailedException.class,
                 () -> builder.build());
         Assertions.assertTrue(e.getMessage().contains(BUILDER_FAILED_MESSAGE));

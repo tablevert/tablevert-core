@@ -17,9 +17,12 @@ import java.util.Map;
 public class Database implements DataSource, Cloneable {
 
     public static class Builder {
+        private static final int DEFAULT_PORT_POSTGRESQL = 5432;
+
         private DatabaseType dbType;
         private String name;
         private String host;
+        private Integer port;
         private Map<String, BackendUser> userMap;
 
         public Builder() {
@@ -38,6 +41,11 @@ public class Database implements DataSource, Cloneable {
 
         public Builder onHost(String host) {
             this.host = host;
+            return this;
+        }
+
+        public Builder withPort(Integer port) {
+            this.port = port;
             return this;
         }
 
@@ -61,13 +69,29 @@ public class Database implements DataSource, Cloneable {
         }
 
         public Database build() throws BuilderFailedException {
+            checkInitPort();
             validate();
             Database database = new Database();
             database.dbType = this.dbType;
             database.name = this.name;
             database.host = this.host;
+            database.port = this.port;
             database.userMap = this.userMap;
             return database;
+        }
+
+        private void checkInitPort() throws BuilderFailedException {
+            if (port != null || dbType == null) {
+                return;
+            }
+            switch (dbType) {
+                case POSTGRESQL:
+                    port = DEFAULT_PORT_POSTGRESQL;
+                    return;
+                default:
+                    throw new BuilderFailedException("No default port available for database type ["
+                            + dbType.name() + "]");
+            }
         }
 
         private void validate() throws BuilderFailedException {
@@ -80,6 +104,9 @@ public class Database implements DataSource, Cloneable {
             }
             if (host == null || host.isEmpty()) {
                 errors += "- host not specified";
+            }
+            if (port == null) {
+                errors += "- port not specified";
             }
             if (userMap == null || userMap.isEmpty()) {
                 errors += "- no users specified";
@@ -94,6 +121,7 @@ public class Database implements DataSource, Cloneable {
     private DatabaseType dbType;
     private String name;
     private String host;
+    private Integer port;
     private Map<String, BackendUser> userMap;
 
     private Database() {
@@ -115,6 +143,8 @@ public class Database implements DataSource, Cloneable {
         return name;
     }
 
+    public Integer getPort() { return port; }
+
     public String getDefaultUserName() {
         // TODO: Add default user property or enhanced user selection logic!
         if (userMap.isEmpty()) {
@@ -130,13 +160,15 @@ public class Database implements DataSource, Cloneable {
         return userMap.get(userName).getSecret();
     }
 
+    @Override
     public Database clone() {
         try {
             Builder cloneBuilder = new Builder()
                     .forDatabase(name)
                     .ofType(dbType)
-                    .onHost(host);
-            this.userMap.entrySet().stream().forEach(user -> cloneBuilder.withUser(user.getValue().clone()));
+                    .onHost(host)
+                    .withPort(port);
+            this.userMap.entrySet().forEach(user -> cloneBuilder.withUser(user.getValue().clone()));
             return cloneBuilder.build();
         } catch (BuilderFailedException e) {
             throw new IllegalStateException("Builder should never fail in clone()");

@@ -6,24 +6,39 @@
 package org.tablevert.core;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.tablevert.core.config.*;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class JdbcDatabaseReaderITCase {
+@Testcontainers
+class JdbcDatabaseReaderContainerITCase {
 
-    private static final String TESTDB_NAME = "HHSSecondTest";
+    private static final String TESTDB_NAME = "PostgresTest";
     private static final String TESTDB_HOST = "localhost";
-    private static final String TESTDB_USER_NAME = "dummyreader";
+    private static final String TESTDB_USER_NAME = "tester";
+    private static final String TESTDB_USER_PW = "test";
+    private static final String TESTDB_INIT_SCRIPT_PATH = "org/tablevert/core/DbInitForJdbcDatabaseReaderITCase.sql";
 
     private static final String TESTQUERY_NAME = "TestQuery";
     private static final String TESTQUERY_COLNAME_A = "id";
     private static final String TESTQUERY_FROM = "mydummy";
 
+
+    @Container
+    private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = (PostgreSQLContainer) new PostgreSQLContainer()
+            .withDatabaseName(TESTDB_NAME)
+            .withUsername(TESTDB_USER_NAME)
+            .withPassword(TESTDB_USER_PW)
+            .withInitScript(TESTDB_INIT_SCRIPT_PATH);
+
     @Test
-    public void retrievesPostgresData() {
+    void retrievesPostgresData() {
         // TODO: Switch to container-based testing!!!
         Assertions.assertDoesNotThrow(() -> fetchPostgresData());
     }
@@ -48,7 +63,8 @@ public class JdbcDatabaseReaderITCase {
                 .forDatabase(TESTDB_NAME)
                 .ofType(DatabaseType.POSTGRESQL)
                 .onHost(TESTDB_HOST)
-                .withUser(new BackendUser(TESTDB_USER_NAME, "teest"))
+                .withPort(POSTGRE_SQL_CONTAINER.getFirstMappedPort())
+                .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_PW))
                 .build();
     }
 

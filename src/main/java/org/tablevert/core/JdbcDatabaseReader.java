@@ -18,14 +18,11 @@ import java.util.*;
 class JdbcDatabaseReader implements DatabaseReader {
 
     static class Builder implements DatabaseReader.Builder {
-        private static final int DEFAULT_PORT_POSTGRESQL = 5432;
-
         private JdbcDatabaseReader dbReader;
         private Database database;
         private PredefinedDatabaseQuery predefinedDatabaseQuery;
         private AppliedQuery appliedQuery;
         private TablevertConfig tablevertConfig;
-        private Integer port;
 
         @Override
         public Builder usingConfig(TablevertConfig tablevertConfig) {
@@ -42,7 +39,6 @@ class JdbcDatabaseReader implements DatabaseReader {
         @Override
         public JdbcDatabaseReader build() throws BuilderFailedException {
             initDatabaseAndQuery();
-            checkInitPort();
             validate();
             dbReader = new JdbcDatabaseReader();
             dbReader.databaseType = database.getDbType();
@@ -75,7 +71,7 @@ class JdbcDatabaseReader implements DatabaseReader {
             return "jdbc:"
                     + database.getDbType().getName() + "://"
                     + database.getHost() + ":"
-                    + port + "/"
+                    + database.getPort() + "/"
                     + database.getName();
         }
 
@@ -108,20 +104,6 @@ class JdbcDatabaseReader implements DatabaseReader {
             }
             if (!errors.isEmpty()) {
                 throw new BuilderFailedException("Builder validation failed with errors: " + errors);
-            }
-        }
-
-        private void checkInitPort() throws BuilderFailedException {
-            if (port != null || database == null) {
-                return;
-            }
-            switch (database.getDbType()) {
-                case POSTGRESQL:
-                    port = DEFAULT_PORT_POSTGRESQL;
-                    return;
-                default:
-                    throw new BuilderFailedException("No default port available for database type ["
-                            + database.getDbType().name() + "]");
             }
         }
 
@@ -202,12 +184,12 @@ class JdbcDatabaseReader implements DatabaseReader {
         if (sortColumns == null || sortColumns.isEmpty()) {
             return "";
         }
-        String sorting = "";
+        StringBuilder sorting = new StringBuilder();
         for (String column : sortColumns) {
             String sortedColumn = checkAddSortDirection(column);
-            sorting += ((!sortedColumn.isEmpty() && !sorting.isEmpty()) ? "," : "") + sortedColumn;
+            sorting.append((!sortedColumn.isEmpty() && (sorting.length() > 0)) ? "," : "").append(sortedColumn);
         }
-        if (sorting.isEmpty()) {
+        if (sorting.length() == 0) {
             return "";
         }
         return " ORDER BY " + sorting;

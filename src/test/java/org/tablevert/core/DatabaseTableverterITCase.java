@@ -8,16 +8,23 @@ package org.tablevert.core;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.tablevert.core.config.*;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+@Testcontainers
 class DatabaseTableverterITCase {
 
+    private static final String TESTDB_NAME = "PostgresTest";
     private static final String TESTDB_HOST = "localhost";
-    private static final String TESTDB_NAME = "HHSSecondTest";
+    private static final String TESTDB_USER_NAME = "tester";
+    private static final String TESTDB_USER_PW = "test";
+    private static final String TESTDB_INIT_SCRIPT_PATH = "org/tablevert/core/DbInitForDatabaseTableverterITCase.sql";
 
     private static final String TESTQUERY_NAME = "testQuery";
     private static final String TESTQUERY_COLUMN_A_FORMULA = "LEFT(description, 4)";
@@ -26,8 +33,13 @@ class DatabaseTableverterITCase {
     private static final String TESTQUERY_FROM = "mydummy";
     private static final String TESTQUERY_WHERE = "id < 3";
 
-    private static final String TESTUSER_NAME = "dummyreader";
 
+    @Container
+    private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = (PostgreSQLContainer) new PostgreSQLContainer()
+            .withDatabaseName(TESTDB_NAME)
+            .withUsername(TESTDB_USER_NAME)
+            .withPassword(TESTDB_USER_PW)
+            .withInitScript(TESTDB_INIT_SCRIPT_PATH);
 
     @Test
     void tablevertsPostgresToXlsx() throws Exception {
@@ -45,12 +57,13 @@ class DatabaseTableverterITCase {
     }
 
     private TablevertConfig getConfigForPostgresTest() throws Exception {
-        TablevertConfig config = new SimpleTablevertConfig.Builder()
+        return new SimpleTablevertConfig.Builder()
                 .withDataSource(new Database.Builder()
                         .forDatabase(TESTDB_NAME)
                         .ofType(DatabaseType.POSTGRESQL)
                         .onHost(TESTDB_HOST)
-                        .withUser(new BackendUser(TESTUSER_NAME, "test"))
+                        .withPort(POSTGRE_SQL_CONTAINER.getFirstMappedPort())
+                        .withUser(new BackendUser(TESTDB_USER_NAME, TESTDB_USER_PW))
                         .build())
                 .withQuery(new PredefinedDatabaseQuery.Builder()
                         .withName(TESTQUERY_NAME)
@@ -61,7 +74,6 @@ class DatabaseTableverterITCase {
                         .withSorting(createValidSorting())
                         .build())
                 .build();
-        return config;
     }
 
     private List<DatabaseQueryColumn> createValidColumns() {
@@ -76,6 +88,8 @@ class DatabaseTableverterITCase {
         sorting.add("-" + TESTQUERY_COLUMN_A_NAME);
         return sorting;
     }
+
+    // TODO: Get rid of this!!!
     private void writeOutputToFile(Output output) throws Exception {
         if (output == null) {
             return;
