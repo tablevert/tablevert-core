@@ -71,6 +71,8 @@ public final class DatabaseTableverter implements Tableverter {
 
     private OutputGenerator selectGeneratorFor(OutputFormat outputFormat) {
         switch (outputFormat) {
+            case HTML:
+                return new HtmlOutputGenerator();
             case XLSX:
                 return new XlsxOutputGenerator();
             default:
