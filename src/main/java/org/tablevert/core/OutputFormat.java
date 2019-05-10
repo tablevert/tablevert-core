@@ -9,7 +9,7 @@ package org.tablevert.core;
  * Available output formats of the {@link Tableverter}.
  */
 public enum OutputFormat {
-    XLSX;
+    HTML, XLSX;
 
     public boolean isDownloadable() {
         switch (this) {

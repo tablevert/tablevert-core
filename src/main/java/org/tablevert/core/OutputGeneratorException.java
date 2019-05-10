@@ -12,4 +12,8 @@ public class OutputGeneratorException extends TablevertCoreException {
     OutputGeneratorException(String message) {
         super(message);
     }
+
+    OutputGeneratorException(String message, Exception e) {
+        super(message, e);
+    }
 }

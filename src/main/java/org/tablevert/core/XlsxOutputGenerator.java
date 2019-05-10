@@ -37,7 +37,7 @@ final class XlsxOutputGenerator implements OutputGenerator {
         }
 
         private void initCellStyles() {
-            // TODO: Intregrate proper cell styling including number and date formats for body cells
+            // TODO: Integrate proper cell styling including number and date formats for body cells
             XSSFCellStyle headerCellStyle = workbook.createCellStyle();
             headerCellStyle.setFont(workbook.createFont());
             headerCellStyle.getFont().setBold(true);
@@ -140,7 +140,7 @@ final class XlsxOutputGenerator implements OutputGenerator {
     @Override
     public Output process(final DataGrid dataGrid) throws OutputGeneratorException {
         XlsxWorkInProgress workInProgress = new XlsxWorkInProgress();
-        workInProgress.addColumnHeaders(dataGrid.cloneColumns());
+        workInProgress.addColumnHeaders(dataGrid.definedColumns());
         workInProgress.addValues(dataGrid);
         workInProgress.finalizeStyling();
         return workInProgress.packOutput();

@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
  */
 final class DataGridRow {
 
-    private final int index;
+    private final long index;
     private final Map<Integer, Object> valueMap;
     private boolean valuesLocked;
 
-    DataGridRow(int index) {
+    DataGridRow(long index) {
         this.index = index;
         this.valueMap = new Hashtable<>();
         this.valuesLocked = false;
@@ -34,7 +34,7 @@ final class DataGridRow {
         }
     }
 
-    int getIndex() {
+    long getIndex() {
         return index;
     }
 
@@ -51,7 +51,7 @@ final class DataGridRow {
         return valueMap.get(colIndex);
     }
 
-    void lockValues() {
+    private void lockValues() {
         valuesLocked = true;
     }
 }

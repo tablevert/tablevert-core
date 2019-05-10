@@ -17,5 +17,8 @@ public abstract class TablevertCoreException extends Exception {
         super(e);
     }
 
+    TablevertCoreException(String message, Exception e) {
+        super(message, e);
+    }
 }
 

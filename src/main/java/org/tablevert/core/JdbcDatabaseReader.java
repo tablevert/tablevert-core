@@ -216,7 +216,7 @@ class JdbcDatabaseReader implements DatabaseReader {
     }
 
     private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException {
-        List<JdbcValueConversionType> conversionTypes = getConversionTypes(dataGrid.cloneColumns());
+        List<JdbcValueConversionType> conversionTypes = getConversionTypes(dataGrid.definedColumns());
         int rowCount = 0;
         while (resultSet.next()) {
             dataGrid.addRow(extractSingleRow(rowCount, resultSet, columnCount, conversionTypes));
@@ -247,7 +247,7 @@ class JdbcDatabaseReader implements DatabaseReader {
     private List<JdbcValueConversionType> getConversionTypes(List<DataGridColumn> columns) {
         List<JdbcValueConversionType> conversionTypes = new ArrayList<>();
         columns.stream()
-                .sorted(Comparator.comparingInt(col -> col.getIndex()))
+                .sorted(Comparator.comparingInt(DataGridColumn::getIndex))
                 .forEach(col -> conversionTypes.add(col.getJavaClassName().startsWith("java")
                         ? JdbcValueConversionType.OBJECT : JdbcValueConversionType.STRING));
         return conversionTypes;
