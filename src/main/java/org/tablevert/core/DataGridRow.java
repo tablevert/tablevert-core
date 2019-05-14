@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
  */
 final class DataGridRow {
 
-    private final long index;
+    private final String id;
     private final Map<Integer, Object> valueMap;
     private boolean valuesLocked;
 
-    DataGridRow(long index) {
-        this.index = index;
+    DataGridRow(String id) {
+        this.id = id;
         this.valueMap = new Hashtable<>();
         this.valuesLocked = false;
     }
@@ -34,8 +34,8 @@ final class DataGridRow {
         }
     }
 
-    long getIndex() {
-        return index;
+    String getId() {
+        return id;
     }
 
     List<Integer> getColumnIndicesOfValues() {

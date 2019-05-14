@@ -58,7 +58,7 @@ final class HtmlOutputGenerator implements OutputGenerator {
             if (gridRow == null) {
                 return null;
             }
-            DataRow dataRow = new DataRow(String.valueOf(gridRow.getIndex()));
+            DataRow dataRow = new DataRow(gridRow.getId());
             for (int colIndex = 0; colIndex <= maxColIndex; colIndex++) {
                 Object value = gridRow.getValue(colIndex);
                 // TODO: Add appropriate formatting

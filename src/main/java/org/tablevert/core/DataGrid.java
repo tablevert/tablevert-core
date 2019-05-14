@@ -28,7 +28,8 @@ final class DataGrid {
         columns.putIfAbsent(column.getIndex(), column);
     }
 
-    void addRow(DataGridRow row) {
+    void addRow(DataGridRow row) throws DataGridException {
+        ensureUniqueRowId(row.getId(), rows.size());
         rows.add(row);
     }
 
@@ -49,18 +50,24 @@ final class DataGrid {
     }
 
     DataGridRow getRow(int rowIndex) {
-        return rowIndex >= rows.size() ? null : rows.get(rowIndex);
+        return (rowIndex < 0 || rowIndex >= rows.size()) ? null : rows.get(rowIndex);
     }
 
     int getDefinedColumnCount() {
         return columns.size();
     }
 
-    int getRowCount() {
+    long getRowCount() {
         return rows.size();
     }
 
-
-
+    private void ensureUniqueRowId(String id, long index) throws DataGridException {
+        if (id == null || id.isEmpty()) {
+            throw new DataGridException("Row id must not be empty for row no. " + index);
+        }
+        if (rows.stream().filter(row -> id.equals(row.getId())).count() > 0) {
+            throw new DataGridException(String.format("Duplicate Id [%s] assigned to row no. %d", id, index));
+        }
+    }
 
 }

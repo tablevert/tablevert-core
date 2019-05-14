@@ -215,9 +215,9 @@ class JdbcDatabaseReader implements DatabaseReader {
         return metaData.getColumnCount();
     }
 
-    private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException {
+    private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException, DataGridException {
         List<JdbcValueConversionType> conversionTypes = getConversionTypes(dataGrid.definedColumns());
-        int rowCount = 0;
+        long rowCount = 0;
         while (resultSet.next()) {
             dataGrid.addRow(extractSingleRow(rowCount, resultSet, columnCount, conversionTypes));
             rowCount++;
@@ -225,9 +225,9 @@ class JdbcDatabaseReader implements DatabaseReader {
         return rowCount;
     }
 
-    private DataGridRow extractSingleRow(int rowIndex, ResultSet resultSet, int columnCount,
+    private DataGridRow extractSingleRow(long rowIndex, ResultSet resultSet, int columnCount,
                                          List<JdbcValueConversionType> conversionTypes) throws SQLException {
-        DataGridRow row = new DataGridRow(rowIndex);
+        DataGridRow row = new DataGridRow(String.valueOf(rowIndex));
         for (int i = 0; i < columnCount; i++) {
             Object value = getSingleValue(resultSet, i + 1, conversionTypes.get(i));
             if (value != null) {

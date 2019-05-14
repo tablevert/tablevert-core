@@ -60,6 +60,7 @@ public final class HtmlOutput implements Output {
 
         private void writeColumns() {
             table.append("<colgroup>");
+            table.append("<col class=\"tv-col-id\">").append("</col>");
             columns.forEach(this::addColumnDefinition);
             table.append("</colgroup>");
             table.append("<thead><tr>");
@@ -85,11 +86,9 @@ public final class HtmlOutput implements Output {
         }
 
         private void addDataRow(DataRow dataRow) {
-            if (dataRow == null) {
-                table.append("</tr>");
-            }
-            else {
-                table.append(String.format("<tr id=\"tvdat-%s\">", dataRow.id));
+            table.append("<tr>");
+            if (dataRow != null) {
+                table.append(String.format("<td>%s</td>", dataRow.id));
                 dataRow.values.forEach(this::addDataCell);
             }
             table.append("</tr>");

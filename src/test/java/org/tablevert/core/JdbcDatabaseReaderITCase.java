@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Testcontainers
-class JdbcDatabaseReaderContainerITCase {
+class JdbcDatabaseReaderITCase {
 
     private static final String TESTDB_NAME = "PostgresTest";
     private static final String TESTDB_HOST = "localhost";

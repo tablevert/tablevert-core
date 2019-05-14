@@ -17,6 +17,12 @@ class HtmlOutputGeneratorTest {
     private static final String COLHEADER_TITLE_00 = "A";
     private static final String COLHEADER_TITLE_01 = "B";
 
+    private static final String ROW_ID_00 = "0";
+    private static final String ROW_ID_01 = "1";
+    private static final String ROW_ID_02 = "2";
+    private static final String ROW_ID_03 = "3";
+    private static final String ROW_ID_04 = "4";
+
     private static final String CELLVALUE_00_00 = "value (0, 0)";
     private static final String CELLVALUE_00_01 = "value (0, 1)";
     private static final String CELLVALUE_01_00 = "value (1, 0)";
@@ -26,7 +32,7 @@ class HtmlOutputGeneratorTest {
     private static final String GENERATOR_FAILED_MESSAGE = "Failed to write";
 
     @Test
-    void createsValidHtmlOutput() throws Exception {
+    void createsHtmlOutputWithAllCellsFilled() throws Exception {
         DataGrid dataGrid = createSimpleDataGrid();
         OutputGenerator outputGenerator = new HtmlOutputGenerator();
 
@@ -34,6 +40,17 @@ class HtmlOutputGeneratorTest {
 
         assertNotNull(output);
         assertEquals(expectedResult(), output.toString());
+    }
+
+    @Test
+    void createsHtmlOutputWithMissingData() throws Exception {
+        DataGrid dataGrid = createSimpleDataGridWithMissingData();
+        OutputGenerator outputGenerator = new HtmlOutputGenerator();
+
+        Output output = outputGenerator.process(dataGrid);
+
+        assertNotNull(output);
+        assertEquals(expectedResultWithMissingData(), output.toString());
     }
 
     @Test
@@ -48,7 +65,7 @@ class HtmlOutputGeneratorTest {
     }
 
     @Test
-    void failsWithoutColumns() {
+    void failsWithoutColumns() throws Exception {
         DataGrid dataGrid = createSimpleDataGridWithoutColumns();
         OutputGenerator outputGenerator = new HtmlOutputGenerator();
 
@@ -62,10 +79,17 @@ class HtmlOutputGeneratorTest {
         assertTrue(cause.getMessage().contains("columns empty"));
     }
 
-    private DataGrid createSimpleDataGrid() {
+    private DataGrid createSimpleDataGrid() throws DataGridException {
         DataGrid dataGrid = new DataGrid();
         addColumns(dataGrid);
         addRows(dataGrid);
+        return dataGrid;
+    }
+
+    private DataGrid createSimpleDataGridWithMissingData() throws DataGridException {
+        DataGrid dataGrid = new DataGrid();
+        addColumns(dataGrid);
+        addRowsWithMissingData(dataGrid);
         return dataGrid;
     }
 
@@ -75,7 +99,7 @@ class HtmlOutputGeneratorTest {
         return dataGrid;
     }
 
-    private DataGrid createSimpleDataGridWithoutColumns() {
+    private DataGrid createSimpleDataGridWithoutColumns() throws DataGridException {
         DataGrid dataGrid = new DataGrid();
         addRows(dataGrid);
         return dataGrid;
@@ -91,12 +115,35 @@ class HtmlOutputGeneratorTest {
     }
 
 
-    private void addRows(DataGrid dataGrid) {
-        DataGridRow row = new DataGridRow(0);
+    private void addRows(DataGrid dataGrid) throws DataGridException {
+        DataGridRow row = new DataGridRow(ROW_ID_00);
         row.addReplaceValue(0, CELLVALUE_00_00);
         row.addReplaceValue(1, CELLVALUE_00_01);
         dataGrid.addRow(row);
-        row = new DataGridRow(1);
+        row = new DataGridRow(ROW_ID_01);
+        row.addReplaceValue(0, CELLVALUE_01_00);
+        row.addReplaceValue(1, CELLVALUE_01_01);
+        dataGrid.addRow(row);
+    }
+
+    private void addRowsWithMissingData(DataGrid dataGrid) throws DataGridException {
+        DataGridRow row = new DataGridRow(ROW_ID_00);
+        row.addReplaceValue(0, CELLVALUE_00_00);
+        row.addReplaceValue(1, CELLVALUE_00_01);
+        dataGrid.addRow(row);
+        row = new DataGridRow(ROW_ID_01);
+        row.addReplaceValue(0, CELLVALUE_01_00);
+        row.addReplaceValue(1, "");
+        dataGrid.addRow(row);
+        row = new DataGridRow(ROW_ID_02);
+        row.addReplaceValue(0, CELLVALUE_01_00);
+        row.addReplaceValue(1, CELLVALUE_01_01);
+        dataGrid.addRow(row);
+        row = new DataGridRow(ROW_ID_03);
+        row.addReplaceValue(0, null);
+        row.addReplaceValue(1, CELLVALUE_01_01);
+        dataGrid.addRow(row);
+        row = new DataGridRow(ROW_ID_04);
         row.addReplaceValue(0, CELLVALUE_01_00);
         row.addReplaceValue(1, CELLVALUE_01_01);
         dataGrid.addRow(row);
@@ -105,22 +152,50 @@ class HtmlOutputGeneratorTest {
     private String expectedResult() {
         return new StringBuilder()
                 .append("<table>")
-                .append("<colgroup>")
-                .append("<col></col>")
-                .append("<col></col>")
-                .append("</colgroup>")
-                .append("<thead>")
-                .append("<tr>")
-                .append("<th>").append(COLHEADER_TITLE_00).append("</th>")
-                .append("<th>").append(COLHEADER_TITLE_01).append("</th>")
-                .append("</tr>")
-                .append("</thead>")
+                .append(composeColsAndHead())
                 .append("<tbody>")
-                .append("<tr id=\"tvdat-0\">")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_00))
                 .append("<td>").append(CELLVALUE_00_00).append("</td>")
                 .append("<td>").append(CELLVALUE_00_01).append("</td>")
                 .append("</tr>")
-                .append("<tr id=\"tvdat-1\">")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_01))
+                .append("<td>").append(CELLVALUE_01_00).append("</td>")
+                .append("<td>").append(CELLVALUE_01_01).append("</td>")
+                .append("</tr>")
+                .append("</tbody>")
+                .append("</table>")
+                .toString();
+    }
+
+    private String expectedResultWithMissingData() {
+        return new StringBuilder()
+                .append("<table>")
+                .append(composeColsAndHead())
+                .append("<tbody>")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_00))
+                .append("<td>").append(CELLVALUE_00_00).append("</td>")
+                .append("<td>").append(CELLVALUE_00_01).append("</td>")
+                .append("</tr>")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_01))
+                .append("<td>").append(CELLVALUE_01_00).append("</td>")
+                .append("<td>").append("</td>")
+                .append("</tr>")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_02))
+                .append("<td>").append(CELLVALUE_01_00).append("</td>")
+                .append("<td>").append(CELLVALUE_01_01).append("</td>")
+                .append("</tr>")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_03))
+                .append("<td>").append("</td>")
+                .append("<td>").append(CELLVALUE_01_01).append("</td>")
+                .append("</tr>")
+                .append("<tr>")
+                .append(composeIdCell(ROW_ID_04))
                 .append("<td>").append(CELLVALUE_01_00).append("</td>")
                 .append("<td>").append(CELLVALUE_01_01).append("</td>")
                 .append("</tr>")
@@ -132,7 +207,17 @@ class HtmlOutputGeneratorTest {
     private String expectedResultWithoutData() {
         return new StringBuilder()
                 .append("<table>")
+                .append(composeColsAndHead())
+                .append("<tbody>")
+                .append("</tbody>")
+                .append("</table>")
+                .toString();
+    }
+
+    private String composeColsAndHead() {
+        return new StringBuilder()
                 .append("<colgroup>")
+                .append("<col class=\"tv-col-id\"></col>")
                 .append("<col></col>")
                 .append("<col></col>")
                 .append("</colgroup>")
@@ -142,9 +227,12 @@ class HtmlOutputGeneratorTest {
                 .append("<th>").append(COLHEADER_TITLE_01).append("</th>")
                 .append("</tr>")
                 .append("</thead>")
-                .append("<tbody>")
-                .append("</tbody>")
-                .append("</table>")
+                .toString();
+    }
+
+    private String composeIdCell(String id) {
+        return new StringBuilder()
+                .append("<td>").append(id == null ? "" : id).append("</td>")
                 .toString();
     }
 
