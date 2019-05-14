@@ -15,16 +15,14 @@ final class DataGridRow {
 
     private final String id;
     private final Map<Integer, Object> valueMap;
-    private boolean valuesLocked;
 
     DataGridRow(String id) {
         this.id = id;
         this.valueMap = new Hashtable<>();
-        this.valuesLocked = false;
     }
 
     void addReplaceValue(Integer colIndex, Object value) {
-        if (valuesLocked || colIndex == null || value == null) {
+        if (colIndex == null || value == null) {
             return;
         }
         if (valueMap.containsKey(colIndex)) {
@@ -43,7 +41,6 @@ final class DataGridRow {
     }
 
     Object getValue(int colIndex) {
-        lockValues();
         if (!valueMap.containsKey(colIndex)) {
             return null;
         }
@@ -51,7 +48,4 @@ final class DataGridRow {
         return valueMap.get(colIndex);
     }
 
-    private void lockValues() {
-        valuesLocked = true;
-    }
 }

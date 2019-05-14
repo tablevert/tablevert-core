@@ -41,22 +41,23 @@ public class XlsxOutputGeneratorTest {
     }
 
     private DataGrid createSimpleDataGrid() throws DataGridException {
-        DataGrid dataGrid = new DataGrid();
-        dataGrid.addColumn(
+        DataGrid.Builder dataGridBuilder = new DataGrid.Builder();
+        dataGridBuilder.withColumn(
                 new DataGridColumn(0, COLHEADER_TITLE_00, CLASSNAME_STRING)
         );
-        dataGrid.addColumn(
+        dataGridBuilder.withColumn(
                 new DataGridColumn(1, COLHEADER_TITLE_01, CLASSNAME_STRING)
         );
+        dataGridBuilder.andData();
         DataGridRow row = new DataGridRow(ROW_ID_00);
         row.addReplaceValue(0, CELLVALUE_00_00);
         row.addReplaceValue(1, CELLVALUE_00_01);
-        dataGrid.addRow(row);
+        dataGridBuilder.withRow(row);
         row = new DataGridRow(ROW_ID_01);
         row.addReplaceValue(0, CELLVALUE_01_00);
         row.addReplaceValue(1, CELLVALUE_01_01);
-        dataGrid.addRow(row);
-        return dataGrid;
+        dataGridBuilder.withRow(row);
+        return dataGridBuilder.build();
     }
 
     private void writeOutputToFile(Output output) throws Exception {

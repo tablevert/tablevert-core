@@ -138,12 +138,13 @@ class JdbcDatabaseReader implements DatabaseReader {
 
             ResultSetMetaData metaData = resultSet.getMetaData();
 
-            DataGrid dataGrid = new DataGrid();
-            int columnCount = extractColumns(dataGrid, metaData);
-            extractRows(dataGrid, resultSet, columnCount);
+            DataGrid.Builder dataGridBuilder = new DataGrid.Builder();
+            int columnCount = extractColumns(dataGridBuilder, metaData);
+            dataGridBuilder.andData();
+            extractRows(dataGridBuilder, resultSet, columnCount);
 
-            return dataGrid;
-        } catch (SQLException e) {
+            return dataGridBuilder.build();
+        } catch (SQLException | DataGridException e) {
             throw new DatabaseReaderException(e);
         }
     }
@@ -206,20 +207,20 @@ class JdbcDatabaseReader implements DatabaseReader {
     }
 
 
-    private int extractColumns(DataGrid dataGrid, ResultSetMetaData metaData) throws SQLException {
+    private int extractColumns(DataGrid.Builder dataGridBuilder, ResultSetMetaData metaData) throws SQLException, DataGridException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             DataGridColumn column = new DataGridColumn(i - 1, metaData.getColumnName(i), metaData.getColumnClassName(i));
-            dataGrid.addColumn(column);
+            dataGridBuilder.withColumn(column);
         }
 
         return metaData.getColumnCount();
     }
 
-    private long extractRows(DataGrid dataGrid, ResultSet resultSet, int columnCount) throws SQLException, DataGridException {
-        List<JdbcValueConversionType> conversionTypes = getConversionTypes(dataGrid.definedColumns());
+    private long extractRows(DataGrid.Builder dataGridBuilder, ResultSet resultSet, int columnCount) throws SQLException, DataGridException {
+        List<JdbcValueConversionType> conversionTypes = getConversionTypes(dataGridBuilder.definedColumns());
         long rowCount = 0;
         while (resultSet.next()) {
-            dataGrid.addRow(extractSingleRow(rowCount, resultSet, columnCount, conversionTypes));
+            dataGridBuilder.withRow(extractSingleRow(rowCount, resultSet, columnCount, conversionTypes));
             rowCount++;
         }
         return rowCount;
