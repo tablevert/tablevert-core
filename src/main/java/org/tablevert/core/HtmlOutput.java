@@ -60,10 +60,11 @@ public final class HtmlOutput implements Output {
 
         private void writeColumns() {
             table.append("<colgroup>");
-            table.append("<col class=\"tv-col-id\">").append("</col>");
+            table.append("<col class=\"tv-col-id\" style=\"visibility:collapse\">").append("</col>");
             columns.forEach(this::addColumnDefinition);
             table.append("</colgroup>");
             table.append("<thead><tr>");
+            table.append("<th>row-id</th>");
             columns.forEach(this::addColumnHeader);
             table.append("</tr></thead>");
         }
